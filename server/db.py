@@ -1,0 +1,11 @@
+from litestar.contrib.sqlalchemy.plugins import (
+    SQLAlchemyAsyncConfig,
+    SQLAlchemyInitPlugin,
+    AsyncSessionConfig,
+)
+
+session_config = AsyncSessionConfig(expire_on_commit=False)
+sqlalchemy_config = SQLAlchemyAsyncConfig(
+    connection_string="sqlite+aiosqlite:///test.sqlite", session_config=session_config
+)
+sqlalchemy_plugin = SQLAlchemyInitPlugin(config=sqlalchemy_config)
