@@ -40,15 +40,10 @@ class UserCreateDTO(PydanticDTO[UserCreate]):
     config = DTOConfig()
 
 
-# TODO after implementing DB
-# class UserDTO(SQLAlchemyDTO[User]):
-#     config = DTOConfig(exclude={"password_hash"})
+class UserDTO(SQLAlchemyDTO[User]):
+    config = DTOConfig(exclude={"password_hash"})
 
 
 class UserMockModel(BaseModel):
     email: str
     password_hash: str
-
-
-class UserDTO(PydanticDTO[UserMockModel]):
-    config = DTOConfig(exclude={"password_hash"})

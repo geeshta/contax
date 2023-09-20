@@ -2,8 +2,6 @@ from litestar.contrib.sqlalchemy.base import BigIntBase
 from sqlalchemy import BigInteger, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from server.users.models import User
-
 
 class Contact(BigIntBase):
     first_name: Mapped[str]
@@ -11,4 +9,4 @@ class Contact(BigIntBase):
     phone_number: Mapped[str]
     email: Mapped[str]
     user_id: Mapped[BigInteger] = mapped_column(ForeignKey("user.id"))
-    user = relationship(User, back_populates="contacts", lazy="selectin")
+    user = relationship("User", back_populates="contacts", lazy="selectin")

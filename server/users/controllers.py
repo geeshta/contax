@@ -1,16 +1,28 @@
-import hashlib
 import json
-
-from litestar import post
+import logging
+from litestar import Controller, post
 from litestar.dto import DTOData
+from litestar.di import Provide
 from litestar.exceptions import ClientException
 from pydantic import ValidationError
+from sqlalchemy.ext.asyncio import AsyncSession
+from server.users.dto import UserCreate, UserCreateDTO, UserDTO
+from server.users.models import User
+from server.users.security import user_security_service, UserSecurityService
 
-from server.users.dto import UserCreate, UserCreateDTO, UserDTO, UserMockModel
+
+class UserController(Controller):
+    path = "/users"
+    return_dto = UserDTO
+    dependencies = {"user_security_service": Provide(user_security_service)}
 
 
-@post("/users", dto=UserCreateDTO, return_dto=UserDTO)
-async def create_user(data: DTOData[UserCreate]) -> UserMockModel:
+@post("/", dto=UserCreateDTO)
+async def create_user(
+    data: DTOData[UserCreate],
+    db_session: AsyncSession,
+    user_security_service: UserSecurityService,
+) -> User:
     try:
         user_input = data.create_instance()
     except ValidationError as err:
@@ -19,9 +31,9 @@ async def create_user(data: DTOData[UserCreate]) -> UserMockModel:
             status_code=400,
             extra=json.loads(err.json(include_context=False, include_url=False)),
         ) from err
-    password = user_input.password2
-    hash = hashlib.sha256(password.encode())
-    hex_hash = hash.hexdigest()
+    else:
+        password = user_input.password2
+        hash_string = user_security_service.hash_password(password)
 
-    user = UserMockModel(email=user_input.email, password_hash=hex_hash)
-    return user
+        user = User(email=user_input.email, password_hash=hash_string)
+        return user
