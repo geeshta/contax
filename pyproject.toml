@@ -1,19 +1,21 @@
 [tool.poetry]
-name = "contax"
-version = "0.1.0"
-description = ""
 authors = ["geeshta <stefan.foldesi@outlook.com>"]
+description = ""
+name = "contax"
 readme = "README.md"
+version = "0.1.0"
 
 [tool.poetry.dependencies]
-python = "^3.11"
 litestar = {extras = ["cryptography", "pydantic", "sqlalchemy", "standard"], version = "^2.0.1"}
-
+python = "^3.11"
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.9.1"
 isort = "^5.12.0"
 
 [build-system]
-requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+requires = ["poetry-core"]
+
+[tool.isort]
+profile = "black"
