@@ -1,6 +1,5 @@
 from email_validator import EmailNotValidError, validate_email
-from litestar.contrib.sqlalchemy.base import BigIntAuditBase, BigIntBase
-from sqlalchemy import BigInteger, ForeignKey
+from litestar.contrib.sqlalchemy.base import BigIntAuditBase
 from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
 
 
@@ -16,12 +15,3 @@ class User(BigIntAuditBase):
         except EmailNotValidError as err:
             raise ValueError("Email not valid!") from err
         return value
-
-
-class Contact(BigIntBase):
-    first_name: Mapped[str]
-    last_name: Mapped[str]
-    phone_number: Mapped[str]
-    email: Mapped[str]
-    user_id: Mapped[BigInteger] = mapped_column(ForeignKey("user.id"))
-    user = relationship(User, back_populates="contacts", lazy="selectin")

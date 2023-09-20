@@ -1,3 +1,5 @@
+from litestar.contrib.sqlalchemy.base import BigIntAuditBase as _BigIntAuditBase
+from litestar.contrib.sqlalchemy.base import BigIntBase as _BigIntBase
 from litestar.contrib.sqlalchemy.plugins import (
     AsyncSessionConfig,
     SQLAlchemyAsyncConfig,
