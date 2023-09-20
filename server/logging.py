@@ -1,4 +1,4 @@
-from picologging import getLogger, Logger
+from picologging import Logger, getLogger
 
 
 async def logger() -> Logger:

@@ -1,10 +1,28 @@
-import hashlib
-import secrets
 import base64
-from litestar.exceptions import InternalServerException
-from typing import TypedDict
-from litestar.status_codes import HTTP_500_INTERNAL_SERVER_ERROR
+import hashlib
+import json
+import secrets
+from typing import TypedDict, TypeVar
+
+from litestar import Request
+from litestar.dto import DTOData
+from litestar.exceptions import (
+    ClientException,
+    InternalServerException,
+    NotAuthorizedException,
+)
+from litestar.status_codes import (
+    HTTP_400_BAD_REQUEST,
+    HTTP_401_UNAUTHORIZED,
+    HTTP_500_INTERNAL_SERVER_ERROR,
+)
 from picologging import Logger
+from pydantic import ValidationError
+
+from server.session import AppSession
+from server.users.models import User
+
+T = TypeVar("T")
 
 
 class HashInfo(TypedDict):
@@ -13,9 +31,10 @@ class HashInfo(TypedDict):
     iterations: int
 
 
-class UserSecurityService:
-    def __init__(self, logger: Logger):
+class UserService:
+    def __init__(self, logger: Logger, request: Request):
         self.logger = logger
+        self.request = request
 
     def _generate_hash(
         self, password: str, iterations: int, salt: bytes | None = None
@@ -87,6 +106,37 @@ class UserSecurityService:
 
         return info_from_hash["hash"] == info_from_password["hash"]
 
+    def validate_input(self, data: DTOData[T]) -> T:
+        try:
+            result = data.create_instance()
+        except ValidationError as err:
+            raise ClientException(
+                "Validation error while processing body",
+                status_code=HTTP_400_BAD_REQUEST,
+                extra=json.loads(err.json(include_context=False, include_url=False)),
+            ) from err
+        return result
 
-async def user_security_service(logger: Logger) -> UserSecurityService:
-    return UserSecurityService(logger)
+    def create_user(self, email: str, password: str) -> User:
+        hash_string = self.hash_password(password)
+        user = User(email=email, password_hash=hash_string)
+        return user
+
+    def authenticate_user(self, user: User | None, password: str) -> User:
+        if user is None:
+            raise NotAuthorizedException(
+                "Invalid credentials", status_code=HTTP_401_UNAUTHORIZED
+            )
+
+        is_authenticated = self.verify_password(password, user.password_hash)
+
+        if not is_authenticated:
+            raise NotAuthorizedException(
+                "Invalid credentials", status_code=HTTP_401_UNAUTHORIZED
+            )
+
+        return user
+
+
+async def provide_user_service(logger: Logger, request: Request) -> UserService:
+    return UserService(logger, request)

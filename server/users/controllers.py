@@ -1,49 +1,31 @@
-import json
-import logging
 from litestar import Controller, post
-from litestar.dto import DTOData
 from litestar.di import Provide
-from litestar.exceptions import ClientException, NotAuthorizedException
-from pydantic import ValidationError
+from litestar.dto import DTOData
+from litestar.exceptions import ClientException
+from litestar.status_codes import HTTP_200_OK, HTTP_409_CONFLICT
+from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from server.users.dto import UserCreate, UserCreateDTO, UserDTO, UserLogin, UserLoginDTO
 from server.users.models import User
-from server.users.security import user_security_service, UserSecurityService
-from sqlalchemy.exc import IntegrityError
-from sqlalchemy import select
-from litestar.status_codes import (
-    HTTP_400_BAD_REQUEST,
-    HTTP_409_CONFLICT,
-    HTTP_401_UNAUTHORIZED,
-    HTTP_200_OK,
-)
+from server.users.service import UserService, provide_user_service
 
 
 class UserController(Controller):
     path = "/users"
     return_dto = UserDTO
-    dependencies = {"user_security_service": Provide(user_security_service)}
+    dependencies = {"user_service": Provide(provide_user_service)}
 
     @post("/", dto=UserCreateDTO)
     async def create_user(
         self,
         data: DTOData[UserCreate],
         db_session: AsyncSession,
-        user_security_service: UserSecurityService,
+        user_service: UserService,
     ) -> User:
-        try:
-            user_input = data.create_instance()
-        except ValidationError as err:
-            raise ClientException(
-                "Validation error while processing body",
-                status_code=HTTP_400_BAD_REQUEST,
-                extra=json.loads(err.json(include_context=False, include_url=False)),
-            ) from err
-
-        password = user_input.password2
-        hash_string = user_security_service.hash_password(password)
-
-        user = User(email=user_input.email, password_hash=hash_string)
+        user_input = user_service.validate_input(data)
+        user = user_service.create_user(user_input.email, user_input.password)
 
         try:
             db_session.add(user)
@@ -53,7 +35,7 @@ class UserController(Controller):
             raise ClientException(
                 f"User with email {user.email} already exists.",
                 status_code=HTTP_409_CONFLICT,
-            )
+            ) from err
 
         return user
 
@@ -62,33 +44,12 @@ class UserController(Controller):
         self,
         data: DTOData[UserLogin],
         db_session: AsyncSession,
-        user_security_service: UserSecurityService,
+        user_service: UserService,
     ) -> User:
-        try:
-            user_input = data.create_instance()
-        except ValidationError as err:
-            raise ClientException(
-                "Validation error while processing body",
-                status_code=HTTP_400_BAD_REQUEST,
-                extra=json.loads(err.json(include_context=False, include_url=False)),
-            ) from err
+        user_input = user_service.validate_input(data)
 
         query = select(User).where(User.email == user_input.email)
         result = await db_session.execute(query)
         user = result.scalar_one_or_none()
 
-        if user is None:
-            raise NotAuthorizedException(
-                "Invalid credentials", status_code=HTTP_401_UNAUTHORIZED
-            )
-
-        is_authenticated = user_security_service.verify_password(
-            user_input.password, user.password_hash
-        )
-
-        if not is_authenticated:
-            raise NotAuthorizedException(
-                "Invalid credentials", status_code=HTTP_401_UNAUTHORIZED
-            )
-
-        return user
+        return user_service.authenticate_user(user, user_input.password)
