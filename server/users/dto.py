@@ -12,10 +12,9 @@ if TYPE_CHECKING:
     from pydantic_core.core_schema import FieldValidationInfo
 
 
-class UserCreate(BaseModel):
+class UserLogin(BaseModel):
     email: str
-    password1: str
-    password2: str
+    password: str
 
     @field_validator("email")
     @classmethod
@@ -27,16 +26,24 @@ class UserCreate(BaseModel):
 
         return value
 
+
+class UserCreate(UserLogin):
+    password2: str
+
     @field_validator("password2")
     @classmethod
     def check_passwords_match(cls, value: str, info: "FieldValidationInfo") -> str:
-        if info.data["password1"] != value:
+        if info.data["password"] != value:
             raise ValueError("Passwords did not match.")
 
         return value
 
 
 class UserCreateDTO(PydanticDTO[UserCreate]):
+    config = DTOConfig()
+
+
+class UserLoginDTO(PydanticDTO[UserLogin]):
     config = DTOConfig()
 
 
