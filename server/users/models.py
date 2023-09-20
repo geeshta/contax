@@ -1,7 +1,7 @@
+from email_validator import EmailNotValidError, validate_email
 from litestar.contrib.sqlalchemy.base import BigIntAuditBase, BigIntBase
-from sqlalchemy import ForeignKey, BigInteger
-from sqlalchemy.orm import Mapped, mapped_column, validates, relationship
-from email_validator import validate_email, EmailNotValidError
+from sqlalchemy import BigInteger, ForeignKey
+from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
 
 
 class User(BigIntAuditBase):
@@ -10,7 +10,7 @@ class User(BigIntAuditBase):
     contacts = relationship("Contact", back_populates="user", lazy="noload")
 
     @validates("email")
-    def validate_this_email(self, key: str, value: str) -> str:
+    def check_email_valid(self, key: str, value: str) -> str:
         try:
             validate_email(value)
         except EmailNotValidError as err:

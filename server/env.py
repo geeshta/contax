@@ -1,6 +1,7 @@
-from dotenv import dotenv_values
-from typing import TypedDict, cast
 from pathlib import Path
+from typing import TypedDict, cast
+
+from dotenv import dotenv_values
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 

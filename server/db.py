@@ -1,8 +1,6 @@
-from litestar.contrib.sqlalchemy.plugins import (
-    SQLAlchemyAsyncConfig,
-    SQLAlchemyInitPlugin,
-    AsyncSessionConfig,
-)
+from litestar.contrib.sqlalchemy.plugins import (AsyncSessionConfig,
+                                                 SQLAlchemyAsyncConfig,
+                                                 SQLAlchemyInitPlugin)
 
 session_config = AsyncSessionConfig(expire_on_commit=False)
 sqlalchemy_config = SQLAlchemyAsyncConfig(

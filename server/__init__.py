@@ -1,4 +1,5 @@
 from litestar import Litestar
+
 from server.controllers import create_user
 
 app = Litestar(
