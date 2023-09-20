@@ -16,24 +16,24 @@ class UserController(Controller):
     return_dto = UserDTO
     dependencies = {"user_security_service": Provide(user_security_service)}
 
+    @post("/", dto=UserCreateDTO)
+    async def create_user(
+        self,
+        data: DTOData[UserCreate],
+        db_session: AsyncSession,
+        user_security_service: UserSecurityService,
+    ) -> User:
+        try:
+            user_input = data.create_instance()
+        except ValidationError as err:
+            raise ClientException(
+                "Validation error while processing body",
+                status_code=400,
+                extra=json.loads(err.json(include_context=False, include_url=False)),
+            ) from err
+        else:
+            password = user_input.password2
+            hash_string = user_security_service.hash_password(password)
 
-@post("/", dto=UserCreateDTO)
-async def create_user(
-    data: DTOData[UserCreate],
-    db_session: AsyncSession,
-    user_security_service: UserSecurityService,
-) -> User:
-    try:
-        user_input = data.create_instance()
-    except ValidationError as err:
-        raise ClientException(
-            "Validation error while processing body",
-            status_code=400,
-            extra=json.loads(err.json(include_context=False, include_url=False)),
-        ) from err
-    else:
-        password = user_input.password2
-        hash_string = user_security_service.hash_password(password)
-
-        user = User(email=user_input.email, password_hash=hash_string)
-        return user
+            user = User(email=user_input.email, password_hash=hash_string)
+            return user

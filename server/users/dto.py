@@ -41,7 +41,9 @@ class UserCreateDTO(PydanticDTO[UserCreate]):
 
 
 class UserDTO(SQLAlchemyDTO[User]):
-    config = DTOConfig(exclude={"password_hash"})
+    config = DTOConfig(
+        exclude={"password_hash", "contacts", "created_at", "updated_at"}
+    )
 
 
 class UserMockModel(BaseModel):
