@@ -4,9 +4,8 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 
 class Contact(BigIntBase):
-    first_name: Mapped[str]
-    last_name: Mapped[str]
-    phone_number: Mapped[str]
-    email: Mapped[str]
+    name: Mapped[str]
+    phone_number: Mapped[str | None]
+    email: Mapped[str | None]
     user_id: Mapped[BigInteger] = mapped_column(ForeignKey("user.id"))
     user = relationship("User", back_populates="contacts", lazy="selectin")
