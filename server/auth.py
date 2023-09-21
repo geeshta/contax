@@ -1,11 +1,12 @@
+from litestar.connection import ASGIConnection
 from litestar.middleware.session.client_side import ClientSideSessionBackend
 from litestar.security.session_auth import SessionAuth
-from litestar.connection import ASGIConnection
-from server.session import session_config, AppSession
-from server.users.models import User
-from server.logging import Logger
-from server.users.service import UserService
 from sqlalchemy.ext.asyncio import AsyncSession
+
+from server.logging import Logger
+from server.session import AppSession, session_config
+from server.users.models import User
+from server.users.service import UserService
 
 
 async def retrieve_user_handler(

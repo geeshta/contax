@@ -1,12 +1,12 @@
 from litestar import Controller, Request, get, post
 from litestar.dto import DTOData
-from litestar.status_codes import HTTP_200_OK, HTTP_204_NO_CONTENT, HTTP_403_FORBIDDEN
 from litestar.exceptions import PermissionDeniedException
+from litestar.status_codes import HTTP_200_OK, HTTP_204_NO_CONTENT, HTTP_403_FORBIDDEN
 
-from server.users.dto import UserCreateDTO, UserDTO, UserLoginDTO
-from server.users.models import User, UserCreate, UserLogin
-from server.users.service import UserService
 from server.session import SessionProxy
+from server.users.dto import UserCreate, UserCreateDTO, UserDTO, UserLogin, UserLoginDTO
+from server.users.models import User
+from server.users.service import UserService
 
 
 class UserController(Controller):

@@ -5,7 +5,7 @@ from server.auth import session_auth
 from server.contacts.models import Contact
 from server.db import sqlalchemy_plugin
 from server.logging import provide_logger
-from server.session import session_middleware, provide_session
+from server.session import provide_session, session_middleware
 from server.users.controllers import UserController
 from server.users.service import provide_user_service
 
