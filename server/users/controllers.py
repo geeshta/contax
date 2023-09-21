@@ -1,11 +1,9 @@
-from typing import cast
-
 from litestar import Controller, Request, get, post
 from litestar.di import Provide
 from litestar.dto import DTOData
-from litestar.status_codes import HTTP_200_OK, HTTP_204_NO_CONTENT
+from litestar.status_codes import HTTP_200_OK, HTTP_204_NO_CONTENT, HTTP_403_FORBIDDEN
+from litestar.exceptions import PermissionDeniedException
 
-from server.session import AppSession
 from server.users.dto import UserCreateDTO, UserDTO, UserLoginDTO
 from server.users.models import User, UserCreate, UserLogin
 from server.users.service import UserService, provide_user_service
@@ -19,8 +17,16 @@ class UserController(Controller):
 
     @post("/", dto=UserCreateDTO, exclude_from_auth=True)
     async def create_user(
-        self, data: DTOData[UserCreate], user_service: UserService
+        self,
+        data: DTOData[UserCreate],
+        user_service: UserService,
+        session: SessionProxy,
     ) -> User:
+        if session.get("user_id", None) is not None:
+            raise PermissionDeniedException(
+                "Must be logged out before registering a new user",
+                status_code=HTTP_403_FORBIDDEN,
+            )
         user_input = user_service.validate_input(data)
         user = await user_service.create_user(user_input.email, user_input.password)
         return user

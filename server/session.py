@@ -24,31 +24,31 @@ class SessionProxy(MutableMapping):
         self.logger = logger
 
     @property
-    def session(self) -> AppSession:
+    def _session(self) -> AppSession:
         return cast(AppSession, self.request.session)
 
-    @session.setter
-    def session(self, value: AppSession) -> None:
+    @_session.setter
+    def _session(self, value: AppSession) -> None:
         self.request.set_session(value)
 
     def __getitem__(self, key: str) -> Any:
-        return self.session[key]
+        return self._session[key]
 
     def __setitem__(self, key: str, value: Any) -> None:
-        new_session = deepcopy(self.session)
+        new_session = deepcopy(self._session)
         new_session[key] = value
-        self.session = new_session
+        self._session = new_session
 
     def __delitem__(self, key: str) -> None:
-        new_session = deepcopy(self.session)
+        new_session = deepcopy(self._session)
         del new_session[key]
-        self.session = new_session
+        self._session = new_session
 
     def __iter__(self) -> Iterator[str]:
-        return iter(self.session)
+        return iter(self._session)
 
     def __len__(self) -> int:
-        return len(self.session)
+        return len(self._session)
 
 
 async def provide_session(request: Request, logger: Logger) -> SessionProxy:
