@@ -14,12 +14,15 @@ from litestar.exceptions import (
 from litestar.status_codes import (
     HTTP_400_BAD_REQUEST,
     HTTP_401_UNAUTHORIZED,
+    HTTP_409_CONFLICT,
     HTTP_500_INTERNAL_SERVER_ERROR,
 )
 from picologging import Logger
 from pydantic import ValidationError
+from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from server.session import AppSession
 from server.users.models import User
 
 T = TypeVar("T")
@@ -32,9 +35,10 @@ class HashInfo(TypedDict):
 
 
 class UserService:
-    def __init__(self, logger: Logger, request: Request):
+    def __init__(self, logger: Logger, request: Request, db_session: AsyncSession):
         self.logger = logger
         self.request = request
+        self.db_session = db_session
 
     def _generate_hash(
         self, password: str, iterations: int, salt: bytes | None = None
@@ -117,12 +121,25 @@ class UserService:
             ) from err
         return result
 
-    def create_user(self, email: str, password: str) -> User:
+    async def create_user(self, email: str, password: str) -> User:
         hash_string = self.hash_password(password)
         user = User(email=email, password_hash=hash_string)
+        try:
+            self.db_session.add(user)
+            await self.db_session.commit()
+        except IntegrityError as err:
+            await self.db_session.rollback()
+            raise ClientException(
+                f"User with email {user.email} already exists.",
+                status_code=HTTP_409_CONFLICT,
+            ) from err
+
         return user
 
-    def authenticate_user(self, user: User | None, password: str) -> User:
+    async def authenticate_user(self, email: str, password: str) -> User:
+        query = select(User).where(User.email == email)
+        result = await self.db_session.execute(query)
+        user = result.scalar_one_or_none()
         if user is None:
             raise NotAuthorizedException(
                 "Invalid credentials", status_code=HTTP_401_UNAUTHORIZED
@@ -138,5 +155,7 @@ class UserService:
         return user
 
 
-async def provide_user_service(logger: Logger, request: Request) -> UserService:
-    return UserService(logger, request)
+async def provide_user_service(
+    logger: Logger, request: Request, db_session: AsyncSession
+) -> UserService:
+    return UserService(logger, request, db_session)
