@@ -1,12 +1,14 @@
+from typing import Sequence
+
 from litestar import Controller, Request, delete, get, post, put
 from litestar.dto import DTOData
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from server.contacts.dto import ContactDTO, ContactInDTO, ContactModel
 from server.contacts.models import Contact
-from server.validation import Validation
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
 from server.users.models import User
-from typing import Sequence
+from server.validation import Validation
 
 
 class ContactController(Controller):

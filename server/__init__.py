@@ -1,7 +1,7 @@
 from litestar import Litestar
 from litestar.di import Provide
 
-from server.auth import session_auth
+from server.auth import provide_check_owner, session_auth
 from server.contacts.controllers import ContactController
 from server.db import sqlalchemy_plugin
 from server.logging import provide_logger
@@ -9,7 +9,6 @@ from server.session import provide_session, session_middleware
 from server.users.controllers import UserController
 from server.users.service import provide_user_service
 from server.validation import provide_validation
-from server.auth import provide_check_owner
 
 app = Litestar(
     route_handlers=[UserController, ContactController],
