@@ -17,6 +17,7 @@ class ContactController(Controller):
     @get("/")
     async def list_contacts(self, contact_service: ContactService) -> list[Contact]:
         contacts = await contact_service.get_user_contacts()
+
         return contacts
 
     @post("/")
@@ -28,6 +29,7 @@ class ContactController(Controller):
     ) -> Contact:
         contact_input = validate(data)
         contact = await contact_service.create_contact(contact_input)
+
         return contact
 
     @get("/{id:int}")
@@ -35,6 +37,7 @@ class ContactController(Controller):
         self, id: int, contact_service: ContactService
     ) -> Contact:
         contact = await contact_service.get_user_contact_by_id(id)
+
         return contact
 
     @put("/{id:int}")
@@ -47,6 +50,7 @@ class ContactController(Controller):
     ) -> Contact:
         contact_input = validate(data)
         contact = await contact_service.update_contact(id, contact_input)
+
         return contact
 
     @delete("/{id:int}", dto=None, return_dto=None)
