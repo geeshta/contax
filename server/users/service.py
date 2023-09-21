@@ -15,11 +15,11 @@ from litestar.status_codes import (
     HTTP_409_CONFLICT,
     HTTP_500_INTERNAL_SERVER_ERROR,
 )
-from server.logging import Logger
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from server.logging import Logger
 from server.users.models import User
 
 T = TypeVar("T")

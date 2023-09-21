@@ -1,4 +1,5 @@
-from picologging import Logger as _Logger, getLogger
+from picologging import Logger as _Logger
+from picologging import getLogger
 
 Logger = _Logger
 

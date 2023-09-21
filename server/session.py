@@ -4,9 +4,9 @@ from typing import Any, Iterator, NotRequired, TypedDict, cast
 
 from litestar import Request
 from litestar.middleware.session.client_side import CookieBackendConfig
-from server.logging import Logger
 
 from server.env import app_config
+from server.logging import Logger
 
 session_config = CookieBackendConfig(
     secret=bytes.fromhex(app_config["SECRET"]),
