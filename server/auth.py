@@ -18,8 +18,9 @@ async def retrieve_user_handler(
         state=connection.app.state, scope=connection.scope
     )
 
-    if "user_id" in session:
-        query = select(User).where(User.id == session["user_id"])
+    user_id = session.get("user_id", None)
+    if user_id:
+        query = select(User).where(User.id == user_id)
         result = await db_session.execute(query)
         user = result.scalar_one_or_none()
         return user
