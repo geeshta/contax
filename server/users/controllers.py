@@ -7,6 +7,7 @@ from server.session import SessionProxy
 from server.users.dto import UserCreate, UserCreateDTO, UserDTO, UserLogin, UserLoginDTO
 from server.users.models import User
 from server.users.service import UserService
+from server.validation import Validation
 
 
 class UserController(Controller):
@@ -19,21 +20,26 @@ class UserController(Controller):
         data: DTOData[UserCreate],
         user_service: UserService,
         session: SessionProxy,
+        validate: Validation,
     ) -> User:
         if session.get("user_id", None) is not None:
             raise PermissionDeniedException(
                 "Must be logged out before registering a new user",
                 status_code=HTTP_403_FORBIDDEN,
             )
-        user_input = user_service.validate_input(data)
+        user_input = validate(data)
         user = await user_service.create_user(user_input.email, user_input.password)
         return user
 
     @post("/login", dto=UserLoginDTO, status_code=HTTP_200_OK, exclude_from_auth=True)
     async def login_user(
-        self, data: DTOData[UserLogin], user_service: UserService, session: SessionProxy
+        self,
+        data: DTOData[UserLogin],
+        user_service: UserService,
+        session: SessionProxy,
+        validate: Validation,
     ) -> User:
-        user_input = user_service.validate_input(data)
+        user_input = validate(data)
         user = await user_service.authenticate_user(
             user_input.email, user_input.password
         )

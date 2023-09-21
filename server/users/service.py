@@ -1,10 +1,8 @@
 import base64
 import hashlib
-import json
 import secrets
-from typing import TypedDict, TypeVar
+from typing import TypedDict, TypeVar, overload
 
-from litestar.dto import DTOData
 from litestar.exceptions import (
     ClientException,
     InternalServerException,
@@ -12,14 +10,12 @@ from litestar.exceptions import (
     NotFoundException,
 )
 from litestar.status_codes import (
-    HTTP_400_BAD_REQUEST,
     HTTP_401_UNAUTHORIZED,
     HTTP_404_NOT_FOUND,
     HTTP_409_CONFLICT,
     HTTP_500_INTERNAL_SERVER_ERROR,
 )
-from picologging import Logger
-from pydantic import ValidationError
+from server.logging import Logger
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -110,16 +106,13 @@ class UserService:
 
         return info_from_hash["hash"] == info_from_password["hash"]
 
-    def validate_input(self, data: DTOData[T]) -> T:
-        try:
-            result = data.create_instance()
-        except ValidationError as err:
-            raise ClientException(
-                "Validation error while processing body",
-                status_code=HTTP_400_BAD_REQUEST,
-                extra=json.loads(err.json(include_context=False, include_url=False)),
-            ) from err
-        return result
+    @overload
+    async def get_by_id(self, id: int) -> User:
+        ...
+
+    @overload
+    async def get_by_id(self, id: int, raise_404: bool) -> User | None:
+        ...
 
     async def get_by_id(self, id: int, raise_404: bool = True) -> User | None:
         query = select(User).where(User.id == id)
