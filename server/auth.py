@@ -3,10 +3,11 @@ from litestar.exceptions import NotAuthorizedException
 from litestar.middleware.session.client_side import ClientSideSessionBackend
 from litestar.security.session_auth import SessionAuth
 from litestar.status_codes import HTTP_401_UNAUTHORIZED
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from server.session import AppSession, SessionProxy, session_config
 from server.users.models import User
-from sqlalchemy import select
 
 
 async def retrieve_user_handler(
