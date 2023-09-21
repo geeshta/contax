@@ -17,14 +17,16 @@ async def retrieve_user_handler(
 ) -> User | None:
     db_session_provider = connection.app.dependencies["db_session"]
     logger_provider = connection.app.dependencies["logger"]
+    transaction_provider = connection.app.dependencies["transaction"]
     user_service_provider = connection.app.dependencies["user_service"]
 
     db_session: AsyncSession = await db_session_provider(
         state=connection.app.state, scope=connection.scope
     )
+    transaction: AsyncSession = await transaction_provider(db_session=db_session)
     logger: Logger = await logger_provider()
     user_service: UserService = await user_service_provider(
-        logger=logger, db_session=db_session
+        logger=logger, db_session=db_session, transaction=transaction
     )
     if "user_id" not in session:
         return None

@@ -4,7 +4,6 @@ import secrets
 from typing import TypedDict, TypeVar, overload
 
 from litestar.exceptions import (
-    ClientException,
     InternalServerException,
     NotAuthorizedException,
     NotFoundException,
@@ -12,11 +11,9 @@ from litestar.exceptions import (
 from litestar.status_codes import (
     HTTP_401_UNAUTHORIZED,
     HTTP_404_NOT_FOUND,
-    HTTP_409_CONFLICT,
     HTTP_500_INTERNAL_SERVER_ERROR,
 )
 from sqlalchemy import select
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from server.logging import Logger
@@ -33,9 +30,12 @@ class HashInfo(TypedDict):
 
 
 class UserService:
-    def __init__(self, logger: Logger, db_session: AsyncSession):
+    def __init__(
+        self, logger: Logger, db_session: AsyncSession, transaction: AsyncSession
+    ):
         self.logger = logger
         self.db_session = db_session
+        self.transaction = transaction
 
     def _generate_hash(
         self, password: str, iterations: int, salt: bytes | None = None
@@ -128,16 +128,8 @@ class UserService:
     async def create_user(self, user_input: UserCreate) -> User:
         hash_string = self.hash_password(user_input.password)
         user = User(email=user_input.email, password_hash=hash_string)
-        try:
-            self.db_session.add(user)
-            await self.db_session.commit()
-        except IntegrityError as err:
-            await self.db_session.rollback()
-            raise ClientException(
-                f"User with email {user.email} already exists.",
-                status_code=HTTP_409_CONFLICT,
-            ) from err
-
+        self.transaction.add(user)
+        await self.transaction.commit()
         return user
 
     async def authenticate_user(self, user_input: UserLogin) -> User:
@@ -159,5 +151,7 @@ class UserService:
         return user
 
 
-async def provide_user_service(logger: Logger, db_session: AsyncSession) -> UserService:
-    return UserService(logger, db_session)
+async def provide_user_service(
+    logger: Logger, db_session: AsyncSession, transaction: AsyncSession
+) -> UserService:
+    return UserService(logger, db_session, transaction)
