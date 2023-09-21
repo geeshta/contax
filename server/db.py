@@ -1,15 +1,16 @@
+from collections.abc import AsyncGenerator
+
 from litestar.contrib.sqlalchemy.plugins import (
     AsyncSessionConfig,
     SQLAlchemyAsyncConfig,
     SQLAlchemyInitPlugin,
 )
-from collections.abc import AsyncGenerator
+from litestar.exceptions import ClientException
 from litestar.status_codes import HTTP_409_CONFLICT
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
-from litestar.exceptions import ClientException
-from server.env import app_config
 
+from server.env import app_config
 
 session_config = AsyncSessionConfig(expire_on_commit=False)
 sqlalchemy_config = SQLAlchemyAsyncConfig(

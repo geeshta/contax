@@ -42,27 +42,10 @@ session_auth = SessionAuth[User, ClientSideSessionBackend](
 )
 
 
-class OwnershipCheck:
-    def __init__(self, session: SessionProxy):
-        self.session = session
-
-    def __call__(
-        self, obj: DeclarativeBase, key: str = "user_id", raise_403: bool = True
-    ) -> bool:
-        if not "user_id" in self.session:
-            raise NotAuthorizedException(
-                "Please log in to access this resource",
-                status_code=HTTP_401_UNAUTHORIZED,
-            )
-
-        result = getattr(obj, key, None) == self.session["user_id"]
-        if not result and raise_403:
-            raise PermissionDeniedException(
-                "Access denied", status_code=HTTP_403_FORBIDDEN
-            )
-
-        return result
-
-
-async def provide_check_owner(session: SessionProxy) -> OwnershipCheck:
-    return OwnershipCheck(session)
+async def provide_current_user_id(session: SessionProxy) -> int:
+    if not "user_id" in session:
+        raise NotAuthorizedException(
+            "Please log in to access this resource",
+            status_code=HTTP_401_UNAUTHORIZED,
+        )
+    return session["user_id"]

@@ -129,7 +129,6 @@ class UserService:
         hash_string = self.hash_password(user_input.password)
         user = User(email=user_input.email, password_hash=hash_string)
         self.transaction.add(user)
-        await self.transaction.commit()
         return user
 
     async def authenticate_user(self, user_input: UserLogin) -> User:
