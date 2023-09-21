@@ -2,9 +2,9 @@ from litestar.connection import ASGIConnection
 from litestar.exceptions import NotAuthorizedException
 from litestar.middleware.session.client_side import ClientSideSessionBackend
 from litestar.security.session_auth import SessionAuth
-from litestar.status_codes import HTTP_401_UNAUTHORIZED, HTTP_403_FORBIDDEN
+from litestar.status_codes import HTTP_401_UNAUTHORIZED
 from sqlalchemy.ext.asyncio import AsyncSession
-
+from typing import AsyncGenerator
 from server.logging import Logger
 from server.session import AppSession, SessionProxy, session_config
 from server.users.models import User
@@ -22,16 +22,25 @@ async def retrieve_user_handler(
     db_session: AsyncSession = await db_session_provider(
         state=connection.app.state, scope=connection.scope
     )
-    transaction: AsyncSession = await transaction_provider(db_session=db_session)
     logger: Logger = await logger_provider()
-    user_service: UserService = await user_service_provider(
-        logger=logger, db_session=db_session, transaction=transaction
-    )
-    if "user_id" not in session:
-        return None
+    transaction_generator: AsyncGenerator[
+        AsyncSession, None
+    ] = await transaction_provider(db_session=db_session)
 
-    user = await user_service.get_by_id(session["user_id"], raise_404=False)
-    return user
+    transaction = await anext(transaction_generator)
+
+    try:
+        user_service: UserService = await user_service_provider(
+            logger=logger, db_session=db_session, transaction=transaction_generator
+        )
+        if "user_id" not in session:
+            return None
+
+        user = await user_service.get_by_id(session["user_id"], raise_404=False)
+        return user
+
+    finally:
+        await transaction.aclose()
 
 
 session_auth = SessionAuth[User, ClientSideSessionBackend](
