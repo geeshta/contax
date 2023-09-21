@@ -1,8 +1,9 @@
 from litestar.connection import ASGIConnection
-from server.users.models import User
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from server.session import AppSession
+from server.users.models import User
 
 
 async def retrieve_user_handler(

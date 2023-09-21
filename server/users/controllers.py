@@ -1,4 +1,6 @@
-from litestar import Controller, post, get
+from typing import cast
+
+from litestar import Controller, Request, get, post
 from litestar.di import Provide
 from litestar.dto import DTOData
 from litestar.exceptions import ClientException
@@ -6,12 +8,11 @@ from litestar.status_codes import HTTP_200_OK, HTTP_409_CONFLICT
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
-from litestar import Request
+
+from server.session import AppSession
 from server.users.dto import UserCreate, UserCreateDTO, UserDTO, UserLogin, UserLoginDTO
 from server.users.models import User
 from server.users.service import UserService, provide_user_service
-from typing import cast
-from server.session import AppSession
 
 
 class UserController(Controller):
