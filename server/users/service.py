@@ -4,16 +4,17 @@ import json
 import secrets
 from typing import TypedDict, TypeVar
 
-from litestar import Request
 from litestar.dto import DTOData
 from litestar.exceptions import (
     ClientException,
     InternalServerException,
     NotAuthorizedException,
+    NotFoundException,
 )
 from litestar.status_codes import (
     HTTP_400_BAD_REQUEST,
     HTTP_401_UNAUTHORIZED,
+    HTTP_404_NOT_FOUND,
     HTTP_409_CONFLICT,
     HTTP_500_INTERNAL_SERVER_ERROR,
 )
@@ -35,9 +36,8 @@ class HashInfo(TypedDict):
 
 
 class UserService:
-    def __init__(self, logger: Logger, request: Request, db_session: AsyncSession):
+    def __init__(self, logger: Logger, db_session: AsyncSession):
         self.logger = logger
-        self.request = request
         self.db_session = db_session
 
     def _generate_hash(
@@ -121,6 +121,16 @@ class UserService:
             ) from err
         return result
 
+    async def get_by_id(self, id: int, raise_404: bool = True) -> User | None:
+        query = select(User).where(User.id == id)
+        result = await self.db_session.execute(query)
+        user = result.scalar_one_or_none()
+
+        if user is None and raise_404:
+            self.logger.error(f"User with id {id} not found.")
+            raise NotFoundException("User not found.", status_code=HTTP_404_NOT_FOUND)
+        return user
+
     async def create_user(self, email: str, password: str) -> User:
         hash_string = self.hash_password(password)
         user = User(email=email, password_hash=hash_string)
@@ -155,7 +165,5 @@ class UserService:
         return user
 
 
-async def provide_user_service(
-    logger: Logger, request: Request, db_session: AsyncSession
-) -> UserService:
-    return UserService(logger, request, db_session)
+async def provide_user_service(logger: Logger, db_session: AsyncSession) -> UserService:
+    return UserService(logger, db_session)

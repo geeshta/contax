@@ -1,19 +1,17 @@
 from litestar import Controller, Request, get, post
-from litestar.di import Provide
 from litestar.dto import DTOData
 from litestar.status_codes import HTTP_200_OK, HTTP_204_NO_CONTENT, HTTP_403_FORBIDDEN
 from litestar.exceptions import PermissionDeniedException
 
 from server.users.dto import UserCreateDTO, UserDTO, UserLoginDTO
 from server.users.models import User, UserCreate, UserLogin
-from server.users.service import UserService, provide_user_service
+from server.users.service import UserService
 from server.session import SessionProxy
 
 
 class UserController(Controller):
     path = "/users"
     return_dto = UserDTO
-    dependencies = {"user_service": Provide(provide_user_service)}
 
     @post("/", dto=UserCreateDTO, exclude_from_auth=True)
     async def create_user(
