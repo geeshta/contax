@@ -4,7 +4,7 @@ from litestar import Controller, Request, get, post
 from litestar.di import Provide
 from litestar.dto import DTOData
 from litestar.exceptions import ClientException
-from litestar.status_codes import HTTP_200_OK, HTTP_409_CONFLICT
+from litestar.status_codes import HTTP_200_OK, HTTP_409_CONFLICT, HTTP_204_NO_CONTENT
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -63,6 +63,15 @@ class UserController(Controller):
         request.set_session(session)
 
         return user
+
+    @post("/logout", status_code=HTTP_204_NO_CONTENT)
+    async def logout_user(self, request: Request) -> None:
+        session = cast(AppSession, request.session)
+        if "user_id" in session:
+            del session["user_id"]
+        request.set_session(session)
+
+        return None
 
     @get("/me")
     async def get_user(self, request: Request) -> User:

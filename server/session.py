@@ -1,4 +1,4 @@
-from typing import TypedDict
+from typing import TypedDict, NotRequired
 
 from litestar.middleware.session.client_side import CookieBackendConfig
 
@@ -11,4 +11,4 @@ session_middleware = session_config.middleware
 
 
 class AppSession(TypedDict):
-    user_id: int
+    user_id: NotRequired[int]

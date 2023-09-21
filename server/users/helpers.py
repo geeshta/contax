@@ -13,7 +13,13 @@ async def retrieve_user_handler(
     db_session: AsyncSession = await db_session_provider(
         state=connection.app.state, scope=connection.scope
     )
-    query = select(User).where(User.id == session["user_id"])
+
+    user_id = session.get("user_id")
+    if user_id is None:
+        return None
+
+    query = select(User).where(User.id == user_id)
     result = await db_session.execute(query)
     user = result.scalar_one_or_none()
+
     return user
