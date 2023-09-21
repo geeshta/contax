@@ -1,10 +1,9 @@
 from litestar.connection import ASGIConnection
-from litestar.exceptions import NotAuthorizedException, PermissionDeniedException
+from litestar.exceptions import NotAuthorizedException
 from litestar.middleware.session.client_side import ClientSideSessionBackend
 from litestar.security.session_auth import SessionAuth
 from litestar.status_codes import HTTP_401_UNAUTHORIZED, HTTP_403_FORBIDDEN
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import DeclarativeBase
 
 from server.logging import Logger
 from server.session import AppSession, SessionProxy, session_config

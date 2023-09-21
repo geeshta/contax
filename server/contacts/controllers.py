@@ -1,15 +1,10 @@
-from litestar import Controller, Request, delete, get, post, put
+from litestar import Controller, delete, get, post, put
 from litestar.di import Provide
 from litestar.dto import DTOData
-from litestar.exceptions import NotFoundException
-from litestar.status_codes import HTTP_404_NOT_FOUND
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from server.contacts.dto import ContactDTO, ContactInDTO, ContactModel
 from server.contacts.models import Contact
 from server.contacts.service import ContactService, provide_contact_service
-from server.users.models import User
 from server.validation import Validation
 
 
