@@ -28,7 +28,7 @@ class UserController(Controller):
                 status_code=HTTP_403_FORBIDDEN,
             )
         user_input = validate(data)
-        user = await user_service.create_user(user_input.email, user_input.password)
+        user = await user_service.create_user(user_input)
         return user
 
     @post("/login", dto=UserLoginDTO, status_code=HTTP_200_OK, exclude_from_auth=True)
@@ -40,14 +40,12 @@ class UserController(Controller):
         validate: Validation,
     ) -> User:
         user_input = validate(data)
-        user = await user_service.authenticate_user(
-            user_input.email, user_input.password
-        )
+        user = await user_service.authenticate_user(user_input)
         session["user_id"] = user.id
 
         return user
 
-    @post("/logout", status_code=HTTP_204_NO_CONTENT)
+    @post("/logout", status_code=HTTP_204_NO_CONTENT, return_dto=None)
     async def logout_user(self, session: SessionProxy) -> None:
         session.pop("user_id", None)
 

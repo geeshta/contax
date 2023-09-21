@@ -2,8 +2,6 @@ from email_validator import EmailNotValidError, validate_email
 from litestar.contrib.sqlalchemy.base import BigIntAuditBase
 from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
 
-from server.contacts.models import Contact
-
 
 class User(BigIntAuditBase):
     email: Mapped[str] = mapped_column(unique=True)

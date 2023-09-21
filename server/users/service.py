@@ -20,6 +20,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from server.logging import Logger
+from server.users.dto import UserCreate, UserLogin
 from server.users.models import User
 
 T = TypeVar("T")
@@ -124,9 +125,9 @@ class UserService:
             raise NotFoundException("User not found.", status_code=HTTP_404_NOT_FOUND)
         return user
 
-    async def create_user(self, email: str, password: str) -> User:
-        hash_string = self.hash_password(password)
-        user = User(email=email, password_hash=hash_string)
+    async def create_user(self, user_input: UserCreate) -> User:
+        hash_string = self.hash_password(user_input.password)
+        user = User(email=user_input.email, password_hash=hash_string)
         try:
             self.db_session.add(user)
             await self.db_session.commit()
@@ -139,8 +140,8 @@ class UserService:
 
         return user
 
-    async def authenticate_user(self, email: str, password: str) -> User:
-        query = select(User).where(User.email == email)
+    async def authenticate_user(self, user_input: UserLogin) -> User:
+        query = select(User).where(User.email == user_input.email)
         result = await self.db_session.execute(query)
         user = result.scalar_one_or_none()
         if user is None:
@@ -148,7 +149,7 @@ class UserService:
                 "Invalid credentials", status_code=HTTP_401_UNAUTHORIZED
             )
 
-        is_authenticated = self.verify_password(password, user.password_hash)
+        is_authenticated = self.verify_password(user_input.password, user.password_hash)
 
         if not is_authenticated:
             raise NotAuthorizedException(
