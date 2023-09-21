@@ -1,5 +1,5 @@
 from picologging import Logger, getLogger
 
 
-async def logger() -> Logger:
+async def provide_logger() -> Logger:
     return getLogger()
