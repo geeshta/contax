@@ -1,9 +1,12 @@
-import { defineConfig } from "vite";
+import vue from "@vitejs/plugin-vue";
 
 import path from "path";
 
+import { defineConfig } from "vite";
+
 export default ({ mode }) => {
   return defineConfig({
+    plugins: [vue()],
     root: path.join(__dirname, "frontend"),
     envDir: path.resolve(__dirname),
     server: {
@@ -22,3 +25,11 @@ export default ({ mode }) => {
     }
   });
 };
+
+const longLine = [
+  "something",
+  "something else",
+  "this should still fit",
+  "it's close",
+  "ha"
+];

@@ -1,0 +1,7 @@
+{
+  "printWidth": 88,
+  "trailingComma": "none",
+  "bracketSameLine": true,
+  "importOrderSeparation": true,
+  "importOrderSortSpecifiers": true
+}
