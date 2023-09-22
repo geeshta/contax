@@ -5,12 +5,26 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Python: Litestar app",
+      "name": "Vite (frontend)",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "yarn",
+      "runtimeArgs": ["dev"],
+      "skipFiles": ["<node_internals>/**"]
+    },
+    {
+      "name": "Litestar (backend)",
       "type": "python",
       "request": "launch",
       "module": "litestar",
       "justMyCode": true,
       "args": ["--app=server:app", "run", "--debug", "--reload-dir=server/"]
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Fullstack",
+      "configurations": ["Litestar (backend)", "Vite (frontend)"]
     }
   ]
 }
