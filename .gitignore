@@ -51,3 +51,9 @@ venv.bak/
 
 # DB
 db.sqlite3
+
+# NPM
+node_modules/
+
+# Built files
+dist/
