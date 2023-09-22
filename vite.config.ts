@@ -17,11 +17,6 @@ export default ({ mode }) => {
       emptyOutDir: true,
       target: "es2020",
       assetsDir: "static"
-    },
-    resolve: {
-      alias: {
-        "@": path.resolve(__dirname, "frontend/src/")
-      }
     }
   });
 };
