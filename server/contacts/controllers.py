@@ -8,7 +8,7 @@ from server.contacts.service import ContactService, provide_contact_service
 from server.validation import Validation
 
 
-class ContactController(Controller):
+class ContactApiController(Controller):
     path = "/contacts"
     dto = ContactInDTO
     return_dto = ContactDTO

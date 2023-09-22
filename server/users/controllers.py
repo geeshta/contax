@@ -10,7 +10,7 @@ from server.users.service import UserService
 from server.validation import Validation
 
 
-class UserController(Controller):
+class UserApiController(Controller):
     path = "/users"
     return_dto = UserDTO
 
@@ -54,3 +54,8 @@ class UserController(Controller):
     @get("/me")
     async def get_user(self, request: Request) -> User:
         return request.user
+
+
+class UserTemplateController(Controller):
+    ...
+    # @get("/login")
