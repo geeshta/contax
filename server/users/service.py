@@ -17,7 +17,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from server.logging import Logger
-from server.users.dto import UserCreate, UserLogin
+from server.users.dto import UserCreate
 from server.users.models import User
 
 T = TypeVar("T")
@@ -131,21 +131,39 @@ class UserService:
         self.transaction.add(user)
         return user
 
-    async def authenticate_user(self, user_input: UserLogin) -> User:
-        query = select(User).where(User.email == user_input.email)
+    @overload
+    async def authenticate_user(self, email: str, password: str) -> User:
+        ...
+
+    @overload
+    async def authenticate_user(
+        self, email: str, password: str, raise_401: bool
+    ) -> User | None:
+        ...
+
+    async def authenticate_user(
+        self, email: str, password: str, raise_401: bool = True
+    ) -> User | None:
+        query = select(User).where(User.email == email)
         result = await self.db_session.execute(query)
         user = result.scalar_one_or_none()
         if user is None:
-            raise NotAuthorizedException(
-                "Invalid credentials", status_code=HTTP_401_UNAUTHORIZED
-            )
+            if raise_401:
+                raise NotAuthorizedException(
+                    "Invalid credentials", status_code=HTTP_401_UNAUTHORIZED
+                )
+            else:
+                return None
 
-        is_authenticated = self.verify_password(user_input.password, user.password_hash)
+        is_authenticated = self.verify_password(password, user.password_hash)
 
         if not is_authenticated:
-            raise NotAuthorizedException(
-                "Invalid credentials", status_code=HTTP_401_UNAUTHORIZED
-            )
+            if raise_401:
+                raise NotAuthorizedException(
+                    "Invalid credentials", status_code=HTTP_401_UNAUTHORIZED
+                )
+            else:
+                return None
 
         return user
 

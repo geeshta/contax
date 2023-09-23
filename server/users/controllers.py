@@ -1,13 +1,31 @@
+from typing import Annotated
+
 from litestar import Controller, Request, get, post
 from litestar.dto import DTOData
-from litestar.exceptions import PermissionDeniedException
-from litestar.status_codes import HTTP_200_OK, HTTP_204_NO_CONTENT, HTTP_403_FORBIDDEN
+from litestar.enums import RequestEncodingType
+from litestar.exceptions import NotAuthorizedException, PermissionDeniedException
+from litestar.params import Body
+from litestar.response import Template
+from litestar.response.redirect import Redirect
+from litestar.status_codes import (
+    HTTP_200_OK,
+    HTTP_204_NO_CONTENT,
+    HTTP_403_FORBIDDEN,
+    HTTP_302_FOUND,
+)
 
-from server.session import SessionProxy
+from server.session import AppSession
 from server.users.dto import UserCreate, UserCreateDTO, UserDTO, UserLogin, UserLoginDTO
+from server.users.forms import (
+    UserCreateForm,
+    UserCreateFormData,
+    UserLoginForm,
+    UserLoginFormData,
+)
 from server.users.models import User
 from server.users.service import UserService
 from server.validation import Validation
+from server.logging import Logger
 
 
 class UserApiController(Controller):
@@ -19,7 +37,7 @@ class UserApiController(Controller):
         self,
         data: DTOData[UserCreate],
         user_service: UserService,
-        session: SessionProxy,
+        session: AppSession,
         validate: Validation,
     ) -> User:
         if session.get("user_id", None) is not None:
@@ -36,17 +54,19 @@ class UserApiController(Controller):
         self,
         data: DTOData[UserLogin],
         user_service: UserService,
-        session: SessionProxy,
+        session: AppSession,
         validate: Validation,
     ) -> User:
         user_input = validate(data)
-        user = await user_service.authenticate_user(user_input)
+        user = await user_service.authenticate_user(
+            user_input.email, user_input.password
+        )
         session["user_id"] = user.id
 
         return user
 
     @post("/logout", status_code=HTTP_204_NO_CONTENT, return_dto=None)
-    async def logout_user(self, session: SessionProxy) -> None:
+    async def logout_user(self, session: AppSession) -> None:
         session.pop("user_id", None)
 
         return None
@@ -56,6 +76,42 @@ class UserApiController(Controller):
         return request.user
 
 
-class UserTemplateController(Controller):
-    ...
-    # @get("/login")
+class UserPageController(Controller):
+    @get("/login", exclude_from_auth=True, name="login_page")
+    async def login_page(self) -> Template:
+        return Template(
+            template_name="users/login.html.j2",
+            context={"form": UserLoginForm()},
+        )
+
+    @post("/login", exclude_from_auth=True, name="process_login_page")
+    async def process_login(
+        self,
+        data: Annotated[
+            UserLoginFormData, Body(media_type=RequestEncodingType.URL_ENCODED)
+        ],
+        user_service: UserService,
+        session: AppSession,
+        request: Request,
+    ) -> Template | Redirect:
+        form = UserLoginForm(data=data)
+        if form.validate():
+            try:
+                user = await user_service.authenticate_user(
+                    form.email.data, form.password.data
+                )
+            except NotAuthorizedException as err:
+                form.form_errors.append(err.detail)
+                return Template(
+                    template_name="users/login.html.j2",
+                    context={"form": form},
+                )
+            else:
+                session["user_id"] = user.id
+                return Redirect(
+                    request.app.route_reverse("login_page"), status_code=HTTP_302_FOUND
+                )
+        return Template(
+            template_name="users/login.html.j2",
+            context={"form": form},
+        )

@@ -1,8 +1,10 @@
 from litestar import Router
 
 from server.contacts.controllers import ContactApiController
-from server.users.controllers import UserApiController
+from server.users.controllers import UserApiController, UserPageController
 
 api_router = Router(
     path="/api", route_handlers=[UserApiController, ContactApiController]
 )
+
+mpa_router = Router(path="/page", route_handlers=[UserPageController])

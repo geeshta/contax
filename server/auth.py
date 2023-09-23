@@ -6,7 +6,7 @@ from litestar.status_codes import HTTP_401_UNAUTHORIZED
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from server.session import AppSession, SessionProxy, session_config
+from server.session import AppSession, session_config
 from server.users.models import User
 
 
@@ -34,12 +34,3 @@ session_auth = SessionAuth[User, ClientSideSessionBackend](
     session_backend_config=session_config,
     exclude="/schema",
 )
-
-
-async def provide_current_user_id(session: SessionProxy) -> int:
-    if not "user_id" in session:
-        raise NotAuthorizedException(
-            "Please log in to access this resource",
-            status_code=HTTP_401_UNAUTHORIZED,
-        )
-    return session["user_id"]

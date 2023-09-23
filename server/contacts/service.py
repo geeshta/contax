@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from server.contacts.dto import ContactModel
 from server.contacts.models import Contact
 from server.logging import Logger
+from server.session import AppSession
 
 
 class ContactService:
@@ -14,12 +15,12 @@ class ContactService:
         logger: Logger,
         db_session: AsyncSession,
         transaction: AsyncSession,
-        current_user_id: int,
+        session: AppSession,
     ):
         self.logger = logger
         self.db_session = db_session
         self.transaction = transaction
-        self.current_user_id = current_user_id
+        self.current_user_id = session.get("user_id")
 
     async def create_contact(self, contact_input: ContactModel) -> Contact:
         contact = Contact(user_id=self.current_user_id, **contact_input.model_dump())
@@ -64,6 +65,6 @@ async def provide_contact_service(
     logger: Logger,
     db_session: AsyncSession,
     transaction: AsyncSession,
-    current_user_id: int,
+    session: AppSession,
 ) -> ContactService:
-    return ContactService(logger, db_session, transaction, current_user_id)
+    return ContactService(logger, db_session, transaction, session)
