@@ -2,7 +2,7 @@ from typing import TypedDict
 
 from wtforms import Form
 from wtforms.fields import EmailField, PasswordField
-from wtforms.validators import Email, EqualTo, DataRequired
+from wtforms.validators import DataRequired, Email, EqualTo
 
 
 class UserLoginFormData(TypedDict):

@@ -2,6 +2,7 @@ from litestar import Litestar
 from litestar.di import Provide
 
 from server.auth import session_auth
+from server.compression import compression_config
 from server.db import provide_transaction, sqlalchemy_plugin
 from server.logging import provide_logger
 from server.routers import api_router, mpa_router
@@ -23,4 +24,5 @@ app = Litestar(
     middleware=[session_middleware],
     on_app_init=[session_auth.on_app_init],
     template_config=template_config,
+    compression_config=compression_config,
 )

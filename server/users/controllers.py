@@ -10,10 +10,11 @@ from litestar.response.redirect import Redirect
 from litestar.status_codes import (
     HTTP_200_OK,
     HTTP_204_NO_CONTENT,
-    HTTP_403_FORBIDDEN,
     HTTP_302_FOUND,
+    HTTP_403_FORBIDDEN,
 )
 
+from server.logging import Logger
 from server.session import AppSession
 from server.users.dto import UserCreate, UserCreateDTO, UserDTO, UserLogin, UserLoginDTO
 from server.users.forms import (
@@ -25,7 +26,6 @@ from server.users.forms import (
 from server.users.models import User
 from server.users.service import UserService
 from server.validation import Validation
-from server.logging import Logger
 
 
 class UserApiController(Controller):
@@ -79,9 +79,10 @@ class UserApiController(Controller):
 class UserPageController(Controller):
     @get("/login", exclude_from_auth=True, name="login_page")
     async def login_page(self) -> Template:
+        form = UserLoginForm()
         return Template(
             template_name="users/login.html.j2",
-            context={"form": UserLoginForm()},
+            context={"form": form},
         )
 
     @post("/login", exclude_from_auth=True, name="process_login_page")
