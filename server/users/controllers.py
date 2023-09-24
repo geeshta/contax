@@ -1,12 +1,7 @@
-from typing import Annotated
-
 from litestar import Controller, Request, get, post
 from litestar.dto import DTOData
-from litestar.enums import RequestEncodingType
 from litestar.exceptions import NotAuthorizedException, PermissionDeniedException
-from litestar.params import Body
-from litestar.response import Template
-from litestar.response.redirect import Redirect
+from litestar.response import Template, Redirect
 from litestar.status_codes import (
     HTTP_200_OK,
     HTTP_204_NO_CONTENT,
@@ -88,9 +83,7 @@ class UserPageController(Controller):
     @post("/login", exclude_from_auth=True, name="process_login_page")
     async def process_login(
         self,
-        data: Annotated[
-            UserLoginFormData, Body(media_type=RequestEncodingType.URL_ENCODED)
-        ],
+        data: UserLoginFormData,
         user_service: UserService,
         session: AppSession,
         request: Request,
@@ -109,9 +102,8 @@ class UserPageController(Controller):
                 )
             else:
                 session["user_id"] = user.id
-                return Redirect(
-                    request.app.route_reverse("login_page"), status_code=HTTP_302_FOUND
-                )
+                login_url = request.app.route_reverse("login_page")
+                return Redirect(login_url, status_code=HTTP_302_FOUND)
         return Template(
             template_name="users/login.html.j2",
             context={"form": form},

@@ -1,13 +1,11 @@
 from litestar import Litestar
 from litestar.di import Provide
-
 from server.auth import session_auth
-from server.compression import compression_config
+from server.config import compression_config, template_config
 from server.db import provide_transaction, sqlalchemy_plugin
 from server.logging import provide_logger
-from server.routers import api_router, mpa_router
+from server.routing import api_router, mpa_router, handle_unauthorized
 from server.session import provide_session, session_middleware
-from server.templating import template_config
 from server.users.service import provide_user_service
 from server.validation import provide_validation
 
@@ -25,4 +23,5 @@ app = Litestar(
     on_app_init=[session_auth.on_app_init],
     template_config=template_config,
     compression_config=compression_config,
+    exception_handlers={401: handle_unauthorized},  # type: ignore[assignment]
 )
