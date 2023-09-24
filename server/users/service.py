@@ -19,6 +19,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from server.logging import Logger
 from server.users.dto import UserCreate
 from server.users.models import User
+from server.service import AbstractService
 
 T = TypeVar("T")
 
@@ -29,14 +30,7 @@ class HashInfo(TypedDict):
     iterations: int
 
 
-class UserService:
-    def __init__(
-        self, logger: Logger, db_session: AsyncSession, transaction: AsyncSession
-    ):
-        self.logger = logger
-        self.db_session = db_session
-        self.transaction = transaction
-
+class UserService(AbstractService):
     def _generate_hash(
         self, password: str, iterations: int, salt: bytes | None = None
     ) -> HashInfo:
@@ -128,7 +122,8 @@ class UserService:
     async def create_user(self, user_input: UserCreate) -> User:
         hash_string = self.hash_password(user_input.password)
         user = User(email=user_input.email, password_hash=hash_string)
-        self.transaction.add(user)
+        async with self.begin_transaction() as transaction:
+            transaction.add(user)
         return user
 
     @overload
@@ -168,7 +163,5 @@ class UserService:
         return user
 
 
-async def provide_user_service(
-    logger: Logger, db_session: AsyncSession, transaction: AsyncSession
-) -> UserService:
-    return UserService(logger, db_session, transaction)
+async def provide_user_service(logger: Logger, db_session: AsyncSession) -> UserService:
+    return UserService(db_session, logger)

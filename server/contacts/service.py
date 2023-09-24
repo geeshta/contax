@@ -7,25 +7,20 @@ from server.contacts.dto import ContactModel
 from server.contacts.models import Contact
 from server.logging import Logger
 from server.session import AppSession
+from server.service import AbstractService
 
 
-class ContactService:
-    def __init__(
-        self,
-        logger: Logger,
-        db_session: AsyncSession,
-        transaction: AsyncSession,
-        session: AppSession,
-    ):
-        self.logger = logger
-        self.db_session = db_session
-        self.transaction = transaction
-        self.current_user_id = session.get("user_id")
+class ContactService(AbstractService):
+    __slots__ = ("current_user_id",)
+
+    def __init__(self, logger: Logger, db_session: AsyncSession, current_user_id: int):
+        self.current_user_id = current_user_id
+        super().__init__(db_session, logger)
 
     async def create_contact(self, contact_input: ContactModel) -> Contact:
         contact = Contact(user_id=self.current_user_id, **contact_input.model_dump())
-        self.transaction.add(contact)
-        await self.transaction.flush()
+        async with self.begin_transaction() as transaction:
+            transaction.add(contact)
         return contact
 
     async def get_user_contacts(self) -> list[Contact]:
@@ -52,19 +47,17 @@ class ContactService:
 
         for key, value in contact_input.model_dump(exclude_unset=True).items():
             setattr(contact, key, value)
-
-        await self.transaction.merge(contact)
+        async with self.begin_transaction() as transaction:
+            await transaction.merge(contact)
         return contact
 
     async def delete_contact(self, id: int) -> None:
         contact = await self.get_user_contact_by_id(id)
-        await self.transaction.delete(contact)
+        async with self.begin_transaction() as transaction:
+            await transaction.delete(contact)
 
 
 async def provide_contact_service(
-    logger: Logger,
-    db_session: AsyncSession,
-    transaction: AsyncSession,
-    session: AppSession,
+    logger: Logger, db_session: AsyncSession, session: AppSession
 ) -> ContactService:
-    return ContactService(logger, db_session, transaction, session)
+    return ContactService(logger, db_session, session["user_id"])

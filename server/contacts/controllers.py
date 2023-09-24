@@ -67,6 +67,7 @@ class ContactApiController(Controller):
 
 class ContactPageController(Controller):
     path = "/contacts"
+    dependencies = {"contact_service": Provide(provide_contact_service)}
 
     @get("/", name="contact_list_page")
     async def list_contacts(self, contact_service: ContactService) -> Template:

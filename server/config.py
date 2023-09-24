@@ -6,6 +6,7 @@ from litestar.middleware.session.client_side import CookieBackendConfig
 from litestar.contrib.sqlalchemy.plugins import (
     AsyncSessionConfig,
     SQLAlchemyAsyncConfig,
+    SQLAlchemyInitPlugin,
 )
 from litestar.template.config import TemplateConfig
 from litestar.contrib.jinja import JinjaTemplateEngine
@@ -26,10 +27,11 @@ session_config = CookieBackendConfig(
     secret=bytes.fromhex(app_config["SECRET"]),
 )
 
-session_config = AsyncSessionConfig(expire_on_commit=False)
+db_session_config = AsyncSessionConfig(expire_on_commit=False)
 sqlalchemy_config = SQLAlchemyAsyncConfig(
-    connection_string=app_config["DB_STRING"], session_config=session_config
+    connection_string=app_config["DB_STRING"], session_config=db_session_config
 )
+sqlalchemy_plugin = SQLAlchemyInitPlugin(config=sqlalchemy_config)
 
 template_config = TemplateConfig(
     directory=PROJECT_ROOT / "server/templates", engine=JinjaTemplateEngine

@@ -73,7 +73,12 @@ class UserApiController(Controller):
 
 class UserPageController(Controller):
     @get("/login", exclude_from_auth=True, name="login_page")
-    async def login_page(self) -> Template:
+    async def login_page(
+        self, request: Request, session: AppSession
+    ) -> Template | Redirect:
+        if session.get("user_id") is not None:
+            redirect_url = request.app.route_reverse("contact_list_page")
+            return Redirect(redirect_url, status_code=HTTP_302_FOUND)
         form = UserLoginForm()
         return Template(
             template_name="users/login.html.j2",
@@ -96,14 +101,11 @@ class UserPageController(Controller):
                 )
             except NotAuthorizedException as err:
                 form.form_errors.append(err.detail)
-                return Template(
-                    template_name="users/login.html.j2",
-                    context={"form": form},
-                )
             else:
                 session["user_id"] = user.id
-                login_url = request.app.route_reverse("login_page")
-                return Redirect(login_url, status_code=HTTP_302_FOUND)
+                redirect_url = request.app.route_reverse("contact_list_page")
+                response = Redirect(redirect_url, status_code=HTTP_302_FOUND)
+                return response
         return Template(
             template_name="users/login.html.j2",
             context={"form": form},
