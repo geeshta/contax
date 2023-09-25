@@ -1,6 +1,10 @@
 from litestar import Controller, Request, get, post
 from litestar.dto import DTOData
-from litestar.exceptions import NotAuthorizedException, PermissionDeniedException
+from litestar.exceptions import (
+    NotAuthorizedException,
+    PermissionDeniedException,
+    ClientException,
+)
 from litestar.response import Template, Redirect
 from litestar.status_codes import (
     HTTP_200_OK,
@@ -41,7 +45,9 @@ class UserApiController(Controller):
                 status_code=HTTP_403_FORBIDDEN,
             )
         user_input = validate(data)
-        user = await user_service.create_user(user_input)
+        user = await user_service.create_user(
+            email=user_input.email, password=user_input.password
+        )
         return user
 
     @post("/login", dto=UserLoginDTO, status_code=HTTP_200_OK, exclude_from_auth=True)
@@ -72,6 +78,43 @@ class UserApiController(Controller):
 
 
 class UserPageController(Controller):
+    @get("/register", exclude_from_auth=True, name="register_page")
+    async def register_page(
+        self, request: Request, session: AppSession
+    ) -> Template | Redirect:
+        if session.get("user_id") is not None:
+            redirect_url = request.app.route_reverse("contact_list_page")
+            return Redirect(redirect_url, status_code=HTTP_302_FOUND)
+        form = UserCreateForm()
+        return Template(
+            template_name="users/register.html.j2",
+            context={"form": form},
+        )
+
+    @post("/register", exclude_from_auth=True, name="process_register_page")
+    async def process_register(
+        self, data: UserCreateFormData, user_service: UserService, request: Request
+    ) -> Template | Redirect:
+        form = UserCreateForm(data=data)
+        if form.validate():
+            try:
+                await user_service.create_user(
+                    email=form.email.data, password=form.password.data
+                )
+            except ClientException as err:
+                raise ClientException(
+                    status_code=err.status_code,
+                    detail=f"User with email {form.email.data} already exists.",
+                    extra={"return_to": "register_page"},
+                )
+            else:
+                redirect_url = request.app.route_reverse("login_page")
+                return Redirect(redirect_url)
+        return Template(
+            template_name="users/register.html.j2",
+            context={"form": form},
+        )
+
     @get("/login", exclude_from_auth=True, name="login_page")
     async def login_page(
         self, request: Request, session: AppSession

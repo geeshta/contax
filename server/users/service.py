@@ -119,9 +119,9 @@ class UserService(AbstractService):
             raise NotFoundException("User not found.", status_code=HTTP_404_NOT_FOUND)
         return user
 
-    async def create_user(self, user_input: UserCreate) -> User:
-        hash_string = self.hash_password(user_input.password)
-        user = User(email=user_input.email, password_hash=hash_string)
+    async def create_user(self, email: str, password: str) -> User:
+        hash_string = self.hash_password(password)
+        user = User(email=email, password_hash=hash_string)
         async with self.begin_transaction() as transaction:
             transaction.add(user)
         return user

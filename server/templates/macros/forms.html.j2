@@ -20,3 +20,16 @@
     {{ field_as_row(field) }}
   {% endfor %}
 {% endmacro %}
+{% macro form_errors(form) %}
+  {% if form.form_errors %}
+    <div>
+      <ul>
+        {% for error in form.form_errors %}
+          <li>
+            {{ error }}
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+  {% endif %}
+{% endmacro %}

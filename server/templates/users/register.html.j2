@@ -1,17 +1,17 @@
 {% extends "base.html.j2" %}
 {% import 'macros/forms.html.j2' as render %}
 {% block head %}
-  <title>Log In</title>
+  <title>Sign In</title>
 {% endblock head %}
 {% block body %}
-  <form action="{{ url_for("process_login_page") }}" method="post">
+  <form action="{{ url_for("process_register_page") }}" method="post">
     <table>
       <tbody>
         {{ render.form_as_rows(form) }}
         <tr>
           <td>
             <button type="submit">
-              Log In
+              Sign In
             </button>
           </td>
         </tr>

@@ -21,6 +21,5 @@ class AbstractService(ABC):
             async with self.db_session.begin():
                 yield self.db_session
         except IntegrityError as err:
-            raise ClientException(
-                status_code=HTTP_409_CONFLICT, detail=str(err)
-            ) from err
+            self.logger.error(err)
+            raise ClientException(status_code=HTTP_409_CONFLICT) from err
