@@ -3,11 +3,11 @@ from typing import TypedDict, cast
 
 from dotenv import dotenv_values
 from litestar.middleware.session.client_side import CookieBackendConfig
-from litestar.contrib.sqlalchemy.plugins import (
-    AsyncSessionConfig,
+from advanced_alchemy.extensions.litestar.plugins import (
     SQLAlchemyAsyncConfig,
     SQLAlchemyInitPlugin,
 )
+from advanced_alchemy.config import AsyncSessionConfig
 from litestar.template.config import TemplateConfig
 from litestar.contrib.jinja import JinjaTemplateEngine
 from jinja2.environment import Environment

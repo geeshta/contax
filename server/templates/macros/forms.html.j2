@@ -15,7 +15,7 @@
     {% endif %}
   </tr>
 {% endmacro %}
-{% macro form_as_rows(form) %}
+{% macro as_rows(form) %}
   {% for field in form %}
     {{ field_as_row(field) }}
   {% endfor %}

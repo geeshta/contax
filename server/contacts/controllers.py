@@ -1,15 +1,11 @@
 from litestar import Controller, delete, get, post, put, Request
 from litestar.di import Provide
 from litestar.dto import DTOData
-
 from server.contacts.dto import ContactDTO, ContactInDTO, ContactModel
 from server.contacts.models import Contact
 from server.contacts.service import ContactService, provide_contact_service
 from server.validation import Validation
 from server.contacts.forms import ContactForm, ContactFormData
-from typing import Annotated
-from litestar.enums import RequestEncodingType
-from litestar.params import Body
 from litestar.response import Template, Redirect
 
 
@@ -33,7 +29,11 @@ class ContactApiController(Controller):
         validate: Validation,
     ) -> Contact:
         contact_input = validate(data)
-        contact = await contact_service.create_contact(contact_input)
+        contact = await contact_service.create_contact(
+            name=contact_input.name,
+            phone_number=contact_input.phone_number,
+            email=contact_input.email,
+        )
 
         return contact
 
@@ -54,7 +54,12 @@ class ContactApiController(Controller):
         validate: Validation,
     ) -> Contact:
         contact_input = validate(data)
-        contact = await contact_service.update_contact(id, contact_input)
+        contact = await contact_service.update_contact(
+            id,
+            name=contact_input.name,
+            phone_number=contact_input.phone_number,
+            email=contact_input.email,
+        )
 
         return contact
 
@@ -71,13 +76,29 @@ class ContactPageController(Controller):
 
     @get("/", name="contact_list_page")
     async def list_contacts(self, contact_service: ContactService) -> Template:
-        return Template("contacts/contact_list.html.j2")
+        form = ContactForm()
+        contacts = await contact_service.get_user_contacts()
+        return Template(
+            "contacts/contact_list.html.j2",
+            context={"contacts": contacts, "form": form},
+        )
 
-    @post("/")
+    @post("/", name="process_contact_form")
     async def create_contact(
-        self, data: ContactFormData, contact_service: ContactService
-    ) -> Template:
-        ...
+        self, data: ContactFormData, contact_service: ContactService, request: Request
+    ) -> Template | Redirect:
+        form = ContactForm(data=data)
+        if form.validate():
+            await contact_service.create_contact(
+                name=form.name.data, phone_number=form.phone.data, email=form.email.data
+            )
+            contacts_url = request.app.route_reverse("contact_list_page")
+            return Redirect(contacts_url)
+        contacts = await contact_service.get_user_contacts()
+        return Template(
+            "contacts/contact_list.html.j2",
+            context={"contacts": contacts, "form": form},
+        )
 
     @get("/{id:int}")
     async def retrieve_contact(

@@ -17,7 +17,7 @@
       "type": "python",
       "request": "launch",
       "module": "litestar",
-      "justMyCode": true,
+      "justMyCode": false,
       "args": ["--app=server:app", "run", "--debug", "--reload-dir=server/"]
     }
   ],

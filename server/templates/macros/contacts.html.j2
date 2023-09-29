@@ -1,0 +1,19 @@
+{% macro as_list(contacts) %}
+  <table>
+    <tbody>
+      {% for contact in contacts %}
+        <tr>
+          <td>
+            {{ contact.name }}
+          </td>
+          <td>
+            {{ contact.phone_number }}
+          </td>
+          <td>
+            {{ contact.email }}
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endmacro %}

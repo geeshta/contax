@@ -1,5 +1,5 @@
 {% extends "base.html.j2" %}
-{% import 'macros/forms.html.j2' as render %}
+{% import "macros/forms.html.j2" as render_form %}
 {% block head %}
   <title>Sign In</title>
 {% endblock head %}
@@ -7,7 +7,7 @@
   <form action="{{ url_for("process_register_page") }}" method="post">
     <table>
       <tbody>
-        {{ render.form_as_rows(form) }}
+        {{ render_form.as_rows(form) }}
         <tr>
           <td>
             <button type="submit">
@@ -18,5 +18,5 @@
       </tbody>
     </table>
   </form>
-  {{ render.form_errors(form) }}
+  {{ render_form.form_errors(form) }}
 {% endblock body %}
