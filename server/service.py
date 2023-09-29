@@ -14,12 +14,3 @@ class AbstractService(ABC):
     def __init__(self, db_session: AsyncSession, logger: Logger):
         self.db_session = db_session
         self.logger = logger
-
-    @asynccontextmanager
-    async def begin_transaction(self) -> AsyncGenerator[AsyncSession, None]:
-        try:
-            async with self.db_session.begin():
-                yield self.db_session
-        except IntegrityError as err:
-            self.logger.error(err)
-            raise ClientException(status_code=HTTP_409_CONFLICT) from err

@@ -1,8 +1,7 @@
 from litestar import Litestar
 from litestar.di import Provide
 from server.auth import session_auth
-from server.config import compression_config, template_config
-from server.db import provide_transaction, sqlalchemy_plugin
+from server.config import compression_config, template_config, sqlalchemy_plugin
 from server.logging import provide_logger
 from server.routing import api_router, mpa_router
 from server.error_handlers import handle_unauthorized
@@ -14,7 +13,6 @@ app = Litestar(
     route_handlers=[api_router, mpa_router],
     plugins=[sqlalchemy_plugin],
     dependencies={
-        "transaction": Provide(provide_transaction),
         "logger": Provide(provide_logger),
         "session": Provide(provide_session),
         "user_service": Provide(provide_user_service),

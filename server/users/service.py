@@ -11,13 +11,14 @@ from litestar.exceptions import (
 from litestar.status_codes import (
     HTTP_401_UNAUTHORIZED,
     HTTP_404_NOT_FOUND,
+    HTTP_409_CONFLICT,
     HTTP_500_INTERNAL_SERVER_ERROR,
 )
+from litestar.exceptions import ClientException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-
+from sqlalchemy.exc import IntegrityError
 from server.logging import Logger
-from server.users.dto import UserCreate
 from server.users.models import User
 from server.service import AbstractService
 
@@ -122,8 +123,14 @@ class UserService(AbstractService):
     async def create_user(self, email: str, password: str) -> User:
         hash_string = self.hash_password(password)
         user = User(email=email, password_hash=hash_string)
-        async with self.begin_transaction() as transaction:
-            transaction.add(user)
+        try:
+            async with self.db_session.begin():
+                self.db_session.add(user)
+        except IntegrityError:
+            raise ClientException(
+                detail=f"User with email {email} already exists.",
+                status_code=HTTP_409_CONFLICT,
+            )
         return user
 
     @overload

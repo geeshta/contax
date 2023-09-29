@@ -102,11 +102,7 @@ class UserPageController(Controller):
                     email=form.email.data, password=form.password.data
                 )
             except ClientException as err:
-                raise ClientException(
-                    status_code=err.status_code,
-                    detail=f"User with email {form.email.data} already exists.",
-                    extra={"return_to": "register_page"},
-                )
+                form.email.errors.append(err.detail)  # type: ignore
             else:
                 redirect_url = request.app.route_reverse("login_page")
                 return Redirect(redirect_url)
