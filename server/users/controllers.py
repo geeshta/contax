@@ -1,11 +1,11 @@
 from litestar import Controller, Request, get, post
 from litestar.dto import DTOData
 from litestar.exceptions import (
+    ClientException,
     NotAuthorizedException,
     PermissionDeniedException,
-    ClientException,
 )
-from litestar.response import Template, Redirect
+from litestar.response import Redirect, Template
 from litestar.status_codes import (
     HTTP_200_OK,
     HTTP_204_NO_CONTENT,

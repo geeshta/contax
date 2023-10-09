@@ -5,8 +5,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from server.contacts.models import Contact
 from server.logging import Logger
-from server.session import AppSession
 from server.service import AbstractService
+from server.session import AppSession
 
 
 class ContactService(AbstractService):
@@ -25,8 +25,7 @@ class ContactService(AbstractService):
             phone_number=phone_number,
             email=email,
         )
-        async with self.db_session.begin():
-            self.db_session.add(contact)
+        self.db_session.add(contact)
         return contact
 
     async def get_user_contacts(self) -> list[Contact]:
@@ -60,14 +59,12 @@ class ContactService(AbstractService):
         contact.name = name
         contact.phone_number = phone_number
         contact.email = email
-        async with self.db_session.begin():
-            await self.db_session.merge(contact)
+        await self.db_session.merge(contact)
         return contact
 
     async def delete_contact(self, id: int) -> None:
         contact = await self.get_user_contact_by_id(id)
-        async with self.db_session.begin():
-            await self.db_session.delete(contact)
+        await self.db_session.delete(contact)
 
 
 async def provide_contact_service(

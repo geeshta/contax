@@ -1,8 +1,8 @@
-from litestar.exceptions import NotAuthorizedException, ClientException
 from litestar import Request, Response
+from litestar.exceptions import ClientException, NotAuthorizedException
+from litestar.middleware.exceptions.middleware import create_exception_response
 from litestar.response import Redirect
 from litestar.status_codes import HTTP_302_FOUND
-from litestar.middleware.exceptions.middleware import create_exception_response
 
 
 def handle_unauthorized(request: Request, err: NotAuthorizedException) -> Response:

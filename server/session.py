@@ -1,5 +1,6 @@
 from collections.abc import MutableMapping
-from typing import Any, Iterator, TypeAlias, Literal
+from typing import Any, Iterator, Literal, TypeAlias
+
 from litestar import Request
 
 from server.config import session_config

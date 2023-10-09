@@ -1,6 +1,6 @@
+from advanced_alchemy.extensions.litestar.dto import SQLAlchemyDTO, SQLAlchemyDTOConfig
 from email_validator import EmailNotValidError, validate_email
 from litestar.contrib.pydantic import PydanticDTO
-from advanced_alchemy.extensions.litestar.dto import SQLAlchemyDTO, SQLAlchemyDTOConfig
 from litestar.dto.config import DTOConfig
 from pydantic import BaseModel, field_validator
 from pydantic_core.core_schema import ValidationInfo

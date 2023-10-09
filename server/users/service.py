@@ -4,6 +4,7 @@ import secrets
 from typing import TypedDict, TypeVar, overload
 
 from litestar.exceptions import (
+    ClientException,
     InternalServerException,
     NotAuthorizedException,
     NotFoundException,
@@ -14,13 +15,13 @@ from litestar.status_codes import (
     HTTP_409_CONFLICT,
     HTTP_500_INTERNAL_SERVER_ERROR,
 )
-from litestar.exceptions import ClientException
 from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from server.logging import Logger
-from server.users.models import User
 from server.service import AbstractService
+from server.users.models import User
 
 T = TypeVar("T")
 
@@ -124,8 +125,8 @@ class UserService(AbstractService):
         hash_string = self.hash_password(password)
         user = User(email=email, password_hash=hash_string)
         try:
-            async with self.db_session.begin():
-                self.db_session.add(user)
+            self.db_session.add(user)
+            await self.db_session.flush()
         except IntegrityError:
             raise ClientException(
                 detail=f"User with email {email} already exists.",

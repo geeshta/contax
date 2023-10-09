@@ -7,8 +7,8 @@ from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
-from server.contacts.models import *
 from server.config import app_config
+from server.contacts.models import *
 from server.users.models import *
 
 # this is the Alembic Config object, which provides

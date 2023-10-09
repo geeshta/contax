@@ -1,10 +1,11 @@
 from litestar import Litestar
 from litestar.di import Provide
+
 from server.auth import session_auth
-from server.config import compression_config, template_config, sqlalchemy_plugin
+from server.config import compression_config, sqlalchemy_plugin, template_config
+from server.error_handlers import handle_unauthorized
 from server.logging import provide_logger
 from server.routing import api_router, mpa_router
-from server.error_handlers import handle_unauthorized
 from server.session import provide_session, session_middleware
 from server.users.service import provide_user_service
 from server.validation import provide_validation

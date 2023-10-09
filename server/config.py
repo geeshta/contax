@@ -1,19 +1,20 @@
 from pathlib import Path
 from typing import TypedDict, cast
 
-from dotenv import dotenv_values
-from litestar.middleware.session.client_side import CookieBackendConfig
+from advanced_alchemy.config import AsyncSessionConfig
 from advanced_alchemy.extensions.litestar.plugins import (
     SQLAlchemyAsyncConfig,
     SQLAlchemyInitPlugin,
 )
-from advanced_alchemy.config import AsyncSessionConfig
-from litestar.template.config import TemplateConfig
-from litestar.contrib.jinja import JinjaTemplateEngine
+from dotenv import dotenv_values
 from jinja2.environment import Environment
 from jinja2.loaders import FileSystemLoader
 from litestar.config.compression import CompressionConfig
+from litestar.contrib.jinja import JinjaTemplateEngine
+from litestar.middleware.session.client_side import CookieBackendConfig
+from litestar.template.config import TemplateConfig
 
+from server.db import commit_upon_success
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
@@ -31,6 +32,7 @@ session_config = CookieBackendConfig(
 
 sqlalchemy_config = SQLAlchemyAsyncConfig(
     connection_string=app_config["DB_STRING"],
+    before_send_handler=commit_upon_success,
     session_config=AsyncSessionConfig(expire_on_commit=False),
 )
 sqlalchemy_plugin = SQLAlchemyInitPlugin(config=sqlalchemy_config)

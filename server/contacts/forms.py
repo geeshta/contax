@@ -1,9 +1,10 @@
-from wtforms import Form
-from wtforms.fields import StringField, EmailField
-from wtforms.validators import DataRequired, Email
-from litestar.params import Body
+from typing import Annotated, Required, TypeAlias, TypedDict
+
 from litestar.enums import RequestEncodingType
-from typing import TypedDict, Required, TypeAlias, Annotated
+from litestar.params import Body
+from wtforms import Form
+from wtforms.fields import EmailField, StringField
+from wtforms.validators import DataRequired, Email
 
 
 class ContactDict(TypedDict, total=False):
@@ -19,5 +20,5 @@ ContactFormData: TypeAlias = Annotated[
 
 class ContactForm(Form):
     name = StringField("Name", validators=[DataRequired()])
-    phone = StringField("Phone number")
+    phone_number = StringField("Phone number")
     email = EmailField("Email", validators=[Email(message="Invalid email format")])
