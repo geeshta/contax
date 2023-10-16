@@ -97,7 +97,7 @@ class ContactPageController(Controller):
         form = ContactForm(data=data)
         if form.validate():
             await contact_service.create_contact(
-                name=form.name.data,
+                name=form.name.data,  # type: ignore
                 phone_number=form.phone_number.data,
                 email=form.email.data,
             )

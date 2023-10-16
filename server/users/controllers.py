@@ -99,7 +99,7 @@ class UserPageController(Controller):
         if form.validate():
             try:
                 await user_service.create_user(
-                    email=form.email.data, password=form.password.data
+                    email=form.email.data, password=form.password.data  # type: ignore
                 )
             except ClientException as err:
                 form.email.errors.append(err.detail)  # type: ignore
@@ -136,7 +136,7 @@ class UserPageController(Controller):
         if form.validate():
             try:
                 user = await user_service.authenticate_user(
-                    form.email.data, form.password.data
+                    form.email.data, form.password.data  # type: ignore
                 )
             except NotAuthorizedException as err:
                 form.form_errors.append(err.detail)
