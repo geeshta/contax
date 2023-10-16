@@ -139,7 +139,10 @@ class ContactPageController(Controller):
                 phone_number=form.phone_number.data,
                 email=form.email.data,
             )
-            return Redirect(request.app.route_reverse("contact_list_page"))
+            return Redirect(
+                request.app.route_reverse("contact_list_page"),
+                status_code=HTTP_303_SEE_OTHER,
+            )
         contact = await contact_service.get_user_contact_by_id(id)
         return await self.render_contact_detail_page(contact=contact, form=form)
 
@@ -148,4 +151,7 @@ class ContactPageController(Controller):
         self, id: int, contact_service: ContactService, request: Request
     ) -> Redirect:
         await contact_service.delete_contact(id)
-        return Redirect(request.app.route_reverse("contact_list_page"))
+        return Redirect(
+            request.app.route_reverse("contact_list_page"),
+            status_code=HTTP_303_SEE_OTHER,
+        )
