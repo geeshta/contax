@@ -144,5 +144,8 @@ class ContactPageController(Controller):
         return await self.render_contact_detail_page(contact=contact, form=form)
 
     @post("/{id:int}/delete", name="delete_contact")
-    async def delete_contact(self, id: int, request: Request) -> Redirect:
-        ...
+    async def delete_contact(
+        self, id: int, contact_service: ContactService, request: Request
+    ) -> Redirect:
+        await contact_service.delete_contact(id)
+        return Redirect(request.app.route_reverse("contact_list_page"))
