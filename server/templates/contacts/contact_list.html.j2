@@ -1,11 +1,11 @@
 {% extends "base.html.j2" %}
-{% import "contacts/macros.html.j2" as render_contacts %}
+{% import "contacts/macros.html.j2" as render_contacts with context %}
 {% import "forms/macros.html.j2" as render_form %}
 {% block head %}
   <title>My Contacts</title>
 {% endblock head %}
 {% block body %}
-  {{ render_contacts.as_list(contacts) }}
+  {{ render_contacts.as_table_list(contacts) }}
   <form action="{{ url_for("process_contact_form") }}" method="post">
     <table>
       <tbody>

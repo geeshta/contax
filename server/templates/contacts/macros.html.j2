@@ -1,4 +1,4 @@
-{% macro as_list(contacts) %}
+{% macro as_table_list(contacts) %}
   <table>
     <tbody>
       {% for contact in contacts %}
@@ -12,8 +12,32 @@
           <td>
             {{ contact.email }}
           </td>
+          <td>
+            <a href="{{ url_for("contact_detail_page", id=contact.id) }}">Detail</a>
+          </td>
         </tr>
       {% endfor %}
+    </tbody>
+  </table>
+{% endmacro %}
+{% macro as_table(contact) %}
+  <table>
+    <tbody>
+      <tr>
+        <td>
+          <strong>{{ contact.name }}</strong>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          {{ contact.phone_number }}
+        </td>
+      </tr>
+      <tr>
+        <td>
+          {{ contact.email }}
+        </td>
+      </tr>
     </tbody>
   </table>
 {% endmacro %}

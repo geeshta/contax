@@ -1721,13 +1721,13 @@ telegram = ["requests"]
 
 [[package]]
 name = "types-wtforms"
-version = "3.0.0.0"
+version = "3.1.0.0"
 description = "Typing stubs for WTForms"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "types-WTForms-3.0.0.0.tar.gz", hash = "sha256:f390750713acfc6a1905b0688d86c1446df3810033fd8b5b34e1751e35dff4ed"},
-    {file = "types_WTForms-3.0.0.0-py3-none-any.whl", hash = "sha256:9668012b6d0eeeccd77d4822a619a84a59fb95f92a723dcd84761f0c123dcd75"},
+    {file = "types-WTForms-3.1.0.0.tar.gz", hash = "sha256:b41305671c2510ff0bd3dbe5135c2cb222742a088fbce03d5ac1714dcd1e263c"},
+    {file = "types_WTForms-3.1.0.0-py3-none-any.whl", hash = "sha256:56ac965dda3c52e76fc2e663a925b25c850cb6c6f4910e7ce058bc70471e704f"},
 ]
 
 [package.dependencies]
@@ -1946,4 +1946,4 @@ email = ["email-validator"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "20a81ce6617d52df87592e3415841c7231cd5fa5fc7afb3bc15c7719864de6ed"
+content-hash = "8fa9f3b8a8dfb83e10897cdc2394b3525603a006309633467221906b34d9a345"
