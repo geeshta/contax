@@ -1,0 +1,14 @@
+{% extends "htmx_base.html.j2" %}
+{% block head %}
+  <title>My Contacts</title>
+{% endblock head %}
+{% block body %}
+  <div id="contact-list"
+       hx-get="{{ url_for("contact_list_fragment") }}"
+       hx-trigger="load">
+  </div>
+  <div id="contact-form"
+       hx-get="{{ url_for("contact_form_fragment") }}"
+       hx-trigger="load">
+  </div>
+{% endblock body %}

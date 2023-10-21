@@ -1,4 +1,6 @@
 from litestar import Controller, Request, delete, get, post, put
+from litestar.contrib.htmx.request import HTMXRequest
+from litestar.contrib.htmx.response import HTMXTemplate
 from litestar.di import Provide
 from litestar.dto import DTOData
 from litestar.response import Redirect, Template
@@ -155,3 +157,51 @@ class ContactPageController(Controller):
             request.app.route_reverse("contact_list_page"),
             status_code=HTTP_303_SEE_OTHER,
         )
+
+
+class ContactHTMXController(Controller):
+    path = "/contacts"
+    dependencies = {"contact_service": Provide(provide_contact_service)}
+
+    async def render_contact_list(self, contact_service: ContactService) -> Template:
+        contacts = await contact_service.get_user_contacts()
+        return HTMXTemplate(
+            template_name="contacts/htmx/contact_list.html.j2",
+            context={"contacts": contacts},
+        )
+
+    async def render_contact_form(
+        self, form: ContactForm, re_target: str | None = None
+    ) -> Template:
+        return HTMXTemplate(
+            re_target=re_target,
+            template_name="contacts/htmx/contact_form.html.j2",
+            context={"form": form},
+        )
+
+    @get("/")
+    async def contact_page(self) -> Template:
+        return Template("contacts/htmx/contact_list_page.html.j2")
+
+    @get("/list", name="contact_list_fragment")
+    async def list_contacts(self, contact_service: ContactService) -> Template:
+        return await self.render_contact_list(contact_service)
+
+    @get("/form", name="contact_form_fragment")
+    async def get_contact_form(self) -> Template:
+        form = ContactForm()
+        return await self.render_contact_form(form)
+
+    @post("/form", name="create_contact_htmx")
+    async def create_contact(
+        self, data: ContactFormData, contact_service: ContactService
+    ) -> Template:
+        form = ContactForm(data=data)
+        if form.validate():
+            await contact_service.create_contact(
+                name=form.name.data,  # type: ignore
+                phone_number=form.phone_number.data,
+                email=form.email.data,
+            )
+            return await self.render_contact_list(contact_service)
+        return await self.render_contact_form(form, re_target="#contact-form")

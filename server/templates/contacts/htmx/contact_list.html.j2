@@ -1,0 +1,2 @@
+{% import "contacts/macros.html.j2" as render_contacts with context %}
+{{ render_contacts.as_table_list(contacts) }}
