@@ -1,17 +1,22 @@
 {% import "forms/macros.html.j2" as render_form %}
-<form hx-post="{{ url_for("create_contact_htmx") }}"
-      hx-target="#contact-list">
-  <table>
-    <tbody>
-      {{ render_form.as_rows(form) }}
-      <tr>
-        <td>
-          <button type="submit">
-            Add Contact
-          </button>
-        </td>
-      </tr>
-    </tbody>
-  </table>
-</form>
-{{ render_form.form_errors(form) }}
+{% if contact %}
+  <form hx-put="{{ url_for('update_contact_htmx', id=contact.id) }}"
+        hx-target="#contact-detail">
+  {% else %}
+    <form hx-post="{{ url_for("create_contact_htmx") }}"
+          hx-target="#contact-list">
+    {% endif %}
+    <table>
+      <tbody>
+        {{ render_form.as_rows(form) }}
+        <tr>
+          <td>
+            <button type="submit">
+              {{ "Update Contact" if contact else "Add Contact" }}
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </form>
+  {{ render_form.form_errors(form) }}

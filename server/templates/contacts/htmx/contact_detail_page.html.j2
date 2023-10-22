@@ -1,0 +1,18 @@
+{% extends "htmx_base.html.j2" %}
+{% block head %}
+  <title>{{ contact.name }}</title>
+{% endblock head %}
+{% block body %}
+  <div id="contact-detail"
+       hx-get="{{ url_for("contact_detail_fragment", id=contact.id) }}"
+       hx-trigger="load">
+  </div>
+  <div id="contact-form"
+       hx-get="{{ url_for("contact_update_form_fragment", id=contact.id) }}"
+       hx-trigger="load">
+  </div>
+  <button hx-delete="{{ url_for("delete_contact_htmx", id=contact.id) }}"
+          hx-confirm="Are you sure you want to delete this contact?">
+    Delete Contact
+  </button>
+{% endblock body %}

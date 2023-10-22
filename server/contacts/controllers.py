@@ -1,6 +1,6 @@
 from litestar import Controller, Request, delete, get, post, put
 from litestar.contrib.htmx.request import HTMXRequest
-from litestar.contrib.htmx.response import HTMXTemplate
+from litestar.contrib.htmx.response import HTMXTemplate, HXLocation
 from litestar.di import Provide
 from litestar.dto import DTOData
 from litestar.response import Redirect, Template
@@ -171,17 +171,22 @@ class ContactHTMXController(Controller):
         )
 
     async def render_contact_form(
-        self, form: ContactForm, re_target: str | None = None
+        self,
+        form: ContactForm,
+        contact: Contact | None = None,
+        re_target: str | None = None,
     ) -> Template:
         return HTMXTemplate(
             re_target=re_target,
             template_name="contacts/htmx/contact_form.html.j2",
-            context={"form": form},
+            context={"form": form, "contact": contact},
         )
 
-    @get("/")
-    async def contact_page(self) -> Template:
-        return Template("contacts/htmx/contact_list_page.html.j2")
+    async def render_contact_detail(self, contact: Contact) -> Template:
+        return HTMXTemplate(
+            template_name="contacts/htmx/contact_detail.html.j2",
+            context={"contact": contact},
+        )
 
     @get("/list", name="contact_list_fragment")
     async def list_contacts(self, contact_service: ContactService) -> Template:
@@ -192,7 +197,26 @@ class ContactHTMXController(Controller):
         form = ContactForm()
         return await self.render_contact_form(form)
 
-    @post("/form", name="create_contact_htmx")
+    @get("/{id:int}/detail", name="contact_detail_fragment")
+    async def get_contact_detail(
+        self, id: int, contact_service: ContactService
+    ) -> Template:
+        contact = await contact_service.get_user_contact_by_id(id)
+        return await self.render_contact_detail(contact)
+
+    @get("/{id:int}/form", name="contact_update_form_fragment")
+    async def get_contact_update_form(
+        self, id: int, contact_service: ContactService
+    ) -> Template:
+        contact = await contact_service.get_user_contact_by_id(id)
+        form = ContactForm(data=contact.to_dict())
+        return await self.render_contact_form(form, contact)
+
+    @get("/", name="contact_page_htmx")
+    async def contact_page(self) -> Template:
+        return Template("contacts/htmx/contact_list_page.html.j2")
+
+    @post("/", name="create_contact_htmx")
     async def create_contact(
         self, data: ContactFormData, contact_service: ContactService
     ) -> Template:
@@ -205,3 +229,39 @@ class ContactHTMXController(Controller):
             )
             return await self.render_contact_list(contact_service)
         return await self.render_contact_form(form, re_target="#contact-form")
+
+    @get("/{id:int}", name="contact_detail_htmx")
+    async def contact_detail(
+        self, id: int, contact_service: ContactService
+    ) -> Template:
+        contact = await contact_service.get_user_contact_by_id(id)
+        return Template(
+            "contacts/htmx/contact_detail_page.html.j2", context={"contact": contact}
+        )
+
+    @put("/{id:int}", name="update_contact_htmx")
+    async def update_contact(
+        self,
+        id: int,
+        data: ContactFormData,
+        contact_service: ContactService,
+    ) -> Template:
+        form = ContactForm(data=data)
+        if form.validate():
+            contact = await contact_service.update_contact(
+                id=id,
+                name=form.name.data,  # type: ignore
+                phone_number=form.phone_number.data,
+                email=form.email.data,
+            )
+            return await self.render_contact_detail(contact)
+        contact = await contact_service.get_user_contact_by_id(id)
+        return await self.render_contact_form(form, contact, re_target="#contact-form")
+
+    @delete("/{id:int}", name="delete_contact_htmx", status_code=200)
+    async def delete_contact(
+        self, id: int, contact_service: ContactService, request: Request
+    ) -> HXLocation:
+        await contact_service.delete_contact(id)
+        url = request.app.route_reverse("contact_page_htmx")
+        return HXLocation(url)

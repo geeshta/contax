@@ -1,4 +1,4 @@
-{% macro as_table_list(contacts) %}
+{% macro as_table_list(contacts, htmx=False) %}
   <table>
     <tbody>
       {% for contact in contacts %}
@@ -13,7 +13,16 @@
             {{ contact.email }}
           </td>
           <td>
-            <a href="{{ url_for("contact_detail_page", id=contact.id) }}">Detail</a>
+            {% if htmx %}
+              <a hx-get="{{ url_for("contact_detail_htmx", id=contact.id) }}"
+                 hx-target="#content"
+                 hx-select="#content"
+                 hx-swap="outerHTML"
+                 hx-push-url="true"
+                 href="{{ url_for("contact_detail_htmx", id=contact.id) }}">Detail</a>
+            {% else %}
+              <a href="{{ url_for("contact_detail_page", id=contact.id) }}">Detail</a>
+            {% endif %}
           </td>
         </tr>
       {% endfor %}
