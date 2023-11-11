@@ -1,0 +1,14 @@
+{% extends "base.html.j2" %}
+{% block body %}
+  <ul>
+    <li>
+      <a href="{{ url_for("contact_list_page") }}">MPA</a>
+    </li>
+    <li>
+      <a href="{{ url_for("contacts_app") }}">SPA</a>
+    </li>
+    <li>
+      <a href="{{ url_for("contact_page_htmx") }}">HDA</a>
+    </li>
+  </ul>
+{% endblock body %}
