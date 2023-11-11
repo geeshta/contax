@@ -143,7 +143,7 @@ class ContactPageController(Controller):
                 email=form.email.data,
             )
             return Redirect(
-                request.app.route_reverse("contact_list_page"),
+                request.app.route_reverse("update_contact_form", id=id),
                 status_code=HTTP_303_SEE_OTHER,
             )
         contact = await contact_service.get_user_contact_by_id(id)
