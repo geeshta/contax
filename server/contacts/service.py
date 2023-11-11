@@ -26,6 +26,7 @@ class ContactService(AbstractService):
             email=email,
         )
         self.db_session.add(contact)
+        await self.db_session.flush()
         return contact
 
     async def get_user_contacts(self) -> list[Contact]:

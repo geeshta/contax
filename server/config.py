@@ -13,6 +13,8 @@ from litestar.config.compression import CompressionConfig
 from litestar.contrib.jinja import JinjaTemplateEngine
 from litestar.middleware.session.client_side import CookieBackendConfig
 from litestar.template.config import TemplateConfig
+from litestar.config.cors import CORSConfig
+from litestar_vite import VitePlugin, ViteConfig
 
 from server.db import commit_upon_success
 
@@ -48,3 +50,18 @@ template_config = TemplateConfig(
     engine=JinjaTemplateEngine.from_environment(jinja_env),
 )
 compression_config = CompressionConfig(backend="gzip")
+
+
+vite_plugin = VitePlugin(
+    config=ViteConfig(
+        static_dir=PROJECT_ROOT / "frontend",
+        templates_dir=PROJECT_ROOT / "server/templates",
+        static_url="/src/",
+        hot_reload=True,
+        port=5000
+    )
+)
+
+cors_config = CORSConfig(
+    allow_origins=["127.0.0.1:5000", "localhost:5000"]
+)

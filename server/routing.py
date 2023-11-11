@@ -1,4 +1,5 @@
-from litestar import Router
+from litestar import Router, get
+from litestar.response import Redirect, Template
 
 from server.contacts.controllers import (
     ContactApiController,
@@ -19,3 +20,10 @@ mpa_router = Router(
 )
 
 htmx_router = Router(path="/htmx", route_handlers=[ContactHTMXController])
+
+@get("/", exclude_from_auth=True)
+def index() -> Redirect: ...
+
+@get("/app", exclude_from_auth=True)
+def spa() -> Template:
+    return Template("spa.html.j2")

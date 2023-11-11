@@ -77,6 +77,7 @@ class ContactApiController(Controller):
 class ContactPageController(Controller):
     path = "/contacts"
     dependencies = {"contact_service": Provide(provide_contact_service)}
+    include_in_schema = False
 
     async def render_contact_list_page(
         self, form: ContactForm, contact_service: ContactService
@@ -162,6 +163,7 @@ class ContactPageController(Controller):
 class ContactHTMXController(Controller):
     path = "/contacts"
     dependencies = {"contact_service": Provide(provide_contact_service)}
+    include_in_schema = False
 
     async def render_contact_list(self, contact_service: ContactService) -> Template:
         contacts = await contact_service.get_user_contacts()
