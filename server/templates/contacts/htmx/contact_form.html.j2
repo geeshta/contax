@@ -4,7 +4,8 @@
         hx-target="#contact-detail">
   {% else %}
     <form hx-post="{{ url_for("create_contact_htmx") }}"
-          hx-target="#contact-list">
+          hx-target="#contact-list"
+          hx-on::after-request="if(event.detail.successful) this.reset()">
     {% endif %}
     <table>
       <tbody>
