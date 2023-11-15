@@ -13,6 +13,7 @@ onMounted(async () => {
   const response = await fetch(`http://127.0.0.1:8000/api/contacts/${route.params.id}`);
   const res_json = await response.json();
   contact.value = res_json;
+  document.title = contact.value?.name || "My Contacts";
 });
 
 const contactForm = ref<typeof ContactForm>();

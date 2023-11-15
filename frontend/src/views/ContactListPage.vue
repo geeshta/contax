@@ -6,6 +6,7 @@ import ContactForm from "../components/ContactForm.vue";
 const contacts = ref<Contact[]>([]);
 
 onMounted(async () => {
+  document.title = "My Contacts";
   const response = await fetch("http://127.0.0.1:8000/api/contacts");
   const res_json = await response.json();
   contacts.value = res_json;

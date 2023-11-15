@@ -31,6 +31,7 @@ defineExpose({
   clear
 });
 </script>
+
 <template>
   <form @submit.prevent="emit('submitted', { name, phone_number: phoneNumber, email })">
     <table>
