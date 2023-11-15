@@ -22,9 +22,9 @@ mpa_router = Router(
 htmx_router = Router(path="/htmx", route_handlers=[ContactHTMXController])
 
 @get("/", exclude_from_auth=True)
-def index() -> Template: 
+async def index() -> Template: 
     return Template("index.html.j2")
 
 @get(["/app", "/app/{path:path}"], exclude_from_auth=True, name="contacts_app")
-def spa(path: Path | None) -> Template:
+async def spa(path: Path | None) -> Template:
     return Template("spa.html.j2")
